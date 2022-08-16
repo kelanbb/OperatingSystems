@@ -1,0 +1,38 @@
+Windows uses NTFS sile sytem
+(REFS is a newer one not used)
+
+FAT
+old file system
+ExFAT estends FAT
+
+NTFS
+  allows for masive harddrive
+  allows hard drive to hold more than 4 partitions at a time, max 26, 2,5tb max size a partition
+  12 total timstamps spread accross the computer
+
+Data Stream
+  $data is stream windows file explorer uses
+  Alternate Data stream
+    was exploite by having a file adding to itself until file system full
+    with NTFS - will sart giving some tmp files then low priorities, if forces kernel crash
+    can be used w antovirus and stuff to quarintine and signature virus
+    sql database reqire alternate data streams
+    win dows not show as used space
+    see w/ dir /R
+    Create w/
+      cmd
+      ' echo "Elden ring does not deserve GOTY" > calc.fuk:truth.txt
+      #calc will not have alternate data stream, explorer will show file size same even with data written on it
+      #.\calc.fuk will only load calc, not notepad/txt doc
+      #Dir /R will show an alternate data streeam of the txt file connexted to calc, calc is same size but with a alt data stream of another size
+      #writing to alternate data stream will change timstamo so will need to timestomp
+      PS
+      get-item .\calc -stream * #we know calc has ads, look at all stream of it
+        finds it, then read w get-content .\calc.fuk -stream truth.txt
+      gci $pwd | foreach-object { get-item $_.Fullname -stream * } | where {$_.stream -ne ':$DATA' }
+        #finfd and give sinto on ads in current working dir
+        print the info with an extra pipe and get-content...
+      add an ads to a file
+        in demo
+      
+        
