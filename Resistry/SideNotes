@@ -22,8 +22,60 @@ security account manager has hash and tokens
 
 HKLM
   BCD - boot configuration daatastoreage, is boot config nfo for in
-  SYStem
+  SYSTEM
     CurrentControlSet - current control set
     ControlSet001 - older ver of currentcontrolset
       if tere was a setting only want to load sometimes but not all the times put here, will load if need be, good spot for persistance
+      #also a currentcontrolxet00# (2,3,4,5 etc)
+      #clear both if need be
+ 
       
+HKU
+  SID
+    s-1-5-21-domain-#-#
+    
+    
+Registry stored in memory, 
+
+User Registry Settings ---
+  NTUSER.dat - user registry ssettings
+
+System / global reg config ---
+system32/config/ <registry settings> , RegBack -backup of reg
+
+
+
+Manipulatin the Registry
+  Regedit
+    can use GUi, ie right-click > new key, export, delete, import, etc..
+  CMDLINE
+    cmd
+      reg.exe /? - where reg query, add, delete, copy, restore, compare, import, xpoert, etc.. comes from
+        reg query HKLM\Software\Micosoft\Windows\Currentversion\Run
+                  Hkey_Users
+                  Hkey_Users\<SID>\software\microsoft...
+    ps
+      Get-item HKLM:\ #just one key, not whats underneath or sub keys
+      get-childitem HKLM:\ # see sub keys
+        same get-item HKLM:\*\ #....?
+      gci HKLM:\ -recurse #see ALL subkeys, registry, value and the data
+        same as get-item HKLM:\*
+      set-itemproperty -path hklm:\software\microsoft\windows\currentversion\run -name malwar -value "not malware"
+        see with get-item -path hklm:\software\microsoft\windows\currentversion\run
+          new-itemproperty -path hklm:\software\microsoft\windows\currentversion\run -name malwar -value "not dangerious malware" -force
+            #delete value and oveerride
+      get-psdrive to see mounted drives, registry master keys are mounted drives for windows
+        HKU is not there
+          New-PSdrive -name HKU -psprovider registry -root HKEY_Users #mountes HKU as psdrive
+            make perm and add to profile add-content -value "<above command>" $profile.AllUsersAllHosts #add to whatever  profile wanted
+              can reload profile with &$profile>AllUsersAllHosts
+       Query every users run key get-item -path hku:\*\software\microsoft\windows\currentversion\run     
+        also get-item -path registry::Hkey_Users\*\software\microsoft\windows\currentversion\run # dont need to mount this way
+      
+HKLM\Software\microsoft\WIndows NT\CurrentVersion\Imae File Execution Options # make something happen every time a certain exe is launched
+  to put in values / change stuff need to turn off real time protection
+    prereq: set-MPPreference -disableRealTimeMonitoring $True  #use on utilman.exe then use on lockscreen
+      Can see SAM
+
+
+    
