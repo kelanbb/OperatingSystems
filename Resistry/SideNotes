@@ -18,6 +18,12 @@ Windows tends to look at file extension beore signature
 
 HKC stores a key for ech use tthats logged in
 
+security account manager has hash and tokens
+
 HKLM
   BCD - boot configuration daatastoreage, is boot config nfo for in
-  
+  SYStem
+    CurrentControlSet - current control set
+    ControlSet001 - older ver of currentcontrolset
+      if tere was a setting only want to load sometimes but not all the times put here, will load if need be, good spot for persistance
+      
