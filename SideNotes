@@ -1,0 +1,23 @@
+Registry can change product / activation codes on some software iw vmware ws pro oooyah
+
+
+Windows tends to look at file extension beore signature
+  cp Calc.exe $home\desktop
+  cmd
+    cd C:\users\andy.dryer\Desktop
+    calc.exe calc.fuk #rename calc
+    #when try to open calc.fuk, windows asks how to open since there is no .fuk in HKLM\SOFTWARE\Class\X505Enrollment.CalternativeName for ifle extensions
+  Can 'new-item "hklm:\software\classes" -name ".fuk" -force -erroraction silentlycontinue | out-null
+    Refraash regedit to see the key in hklm:\software\classe.fuk
+    this measn we need toa ctually give the kay a value
+      new-itemvalue "hklm:\software\classes\.fuk" -name '(Default)' -propertytype string -value 'exeFile' -force -errorexception silentlycontunie | out-null #need propertytype or else a string by default
+        can also set-itemproperty......????? not as good bc sometimes wont allow
+        There are multiple types of executables so need another key
+          New-itemproperty "hklm:\software\classes\.fuk" -propertytype string -value 'application/x-msdownload' -force -erroraction silentlycontunie | out-null
+    This is a symbollic link    
+
+HKC stores a key for ech use tthats logged in
+
+HKLM
+  BCD - boot configuration daatastoreage, is boot config nfo for in
+  
