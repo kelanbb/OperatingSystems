@@ -35,4 +35,5 @@ Data Stream
       add an ads to a file
         in demo
       
-        
+      can search for file names with ci -force -path C:\ -include "*phish*' -file -recurse -erroraction silentlycontinue
+      cat 
