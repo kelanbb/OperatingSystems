@@ -41,7 +41,8 @@ Linus distribution timeline examples:
   ubuntu
   solaris
   opensuse linux good?
-  
+
+*** *** *** *** ***
 File Heiarchy:
   /   #root
     /bin (/usr/bin,/usr/local/bin for some bin applications)  #standard binaries, ie cat, ls, move, copy, things that requitre system level access generally
@@ -60,8 +61,31 @@ File Heiarchy:
     /tmp    #temporary files, everyone has access, nothing stays, good for temp persistance
     /proc   #processes, all infor on system monitor on system process in here
     
-    
-    
+    # extra info on file heiarchy : https://tldp.org/LDP/Linux-Filesystem-Hierarchy/html/index.html
+
+
+Users and Groups
+  tells who can do what
+  /etc/passwd holds a list of all uers and passwords
+    fields in /etc/passwd: user pw, uid, guid, comments, home dir, shell
+  /etc/group holds groups on a  system
+    fields: goup name,password, gid, users that use this group as a supplementary group, 
+    get on specific user by cat /etc/passwd | grep <user>
+  
+Listing of files in a dir
+  interested in permissions and groups/users
+3 sections of permisions: UGO (Users, Groups, Other)
+  ex if 750 permissions with student:student user:group ownership
+    student user does all
+    student group does read and execute
+    anyone else can do nothing
+
+SUID - bit when turned on, when this file is executed, executed as user who owns it. Perm 4000
+  see where command is ran from with 'which'
+    ex which passswd, then ls -lisa <which passwd> , comes back as -rwsr-xr-x , th s is saying can se wners (roots) permissiont to edit, but only you stuff / entries
+SGUID - sam as SUID but with grouos
+  find / -perm 2000 2>dev/null
+Sticky Bit - applied in shared directories where file itself can only be deleted by the owner, more than just the file can edit
     
     
     
