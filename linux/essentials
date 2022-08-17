@@ -1,0 +1,22 @@
+Ctrl+alt+T
+Create config file in .ssh folder
+  vim .ssh/config
+    Host linops
+      HostName <ip>
+      User <user>
+      Port 22
+  chmod 600 .ssh/linops
+  Next, create private/public ssh key pair for auth
+    ssh-keygen
+    ssh-copy-id linops
+  Connect with ssh linops
+    exit with ctrl+d
+  
+Create alias to connect to linops and open terminator
+  cat .bashrc     to see info on bashrc on current ws
+  #use .bash_aliases to make alias
+    vim .bash_aliases
+      alias sshops sshops='ssh linops -X terminator&'
+Source bashrc to see file
+  source .bashrc
+Connect w/ sshops
