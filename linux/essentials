@@ -20,3 +20,56 @@ Create alias to connect to linops and open terminator
 Source bashrc to see file
   source .bashrc
 Connect w/ sshops
+
+
+Awareness:
+  hostname / uname
+  whoami / id # figure out who you are
+
+  sudo -l #what am I allowed to do
+    (ALL : ALL) ALL means no limit, last ALL is all commands, inter ALL is what you can do to those commands..??
+  #What's going on, what's that
+      w / who # who else on box
+      ps -elf #processes
+  #Why is that happening / what is the direct cause of anything I found to note
+  #How is that happening / overall machanism is happening or whats occuring to cause stuff
+  #if end up on somethin human readable, whats in there
+  
+Linus distribution timeline examples:  
+  mint is okay
+  linus distrobution
+  ubuntu
+  solaris
+  opensuse linux good?
+  
+File Heiarchy:
+  /   #root
+    /bin (/usr/bin,/usr/local/bin for some bin applications)  #standard binaries, ie cat, ls, move, copy, things that requitre system level access generally
+    /sbin (/usr/sbin)  #system binaries, binaries that require sudo to use, programs need to restart box for
+    /home   #default for users home directroy
+    /usr    #univeral sytem recources, catchall for things/files that supposed to be used accross entire system, some binaries, documentation, some example files
+    /etc    #every thing configurable, similar to registry, catchall for system level configuration files
+    /var    #logs, things that are likely to change in length
+    /boot   #what happens at boot process, read at boot, where any of the boot laders stay and their configuration files
+    /dev    #stuff like bin, dev/null, dev/stdin, dev/stdout, dev/stderr, streams , every hardware or special device that device uses ie mouse keyboard sound devices (not drivers, a list of devices to refer)
+    /lib    #libraries, like dll in windows, functions that are neeed for applications to run
+    /mnt    #dedicated directory to be used for perminately attatched external storage, like for usb harddrive ir a file share
+    /media  #removable media, usb drives, cds
+    /opt    #optional, another reservation for any files or appls installed by a user
+    /run    #runtime and variable data, folder mounted aat boot, designed to hold information related to that session of computer running
+    /tmp    #temporary files, everyone has access, nothing stays, good for temp persistance
+    /proc   #processes, all infor on system monitor on system process in here
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
