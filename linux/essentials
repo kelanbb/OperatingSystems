@@ -7,7 +7,7 @@ Create config file in .ssh folder
       Port 22
   chmod 600 .ssh/linops
   Next, create private/public ssh key pair for auth
-    ssh-keygen
+    ssh-keygen    #only time need to make new key is when on different box
     ssh-copy-id linops
   Connect with ssh linops
     exit with ctrl+d
