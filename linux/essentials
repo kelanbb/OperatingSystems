@@ -84,10 +84,20 @@ SUID - bit when turned on, when this file is executed, executed as user who owns
   see where command is ran from with 'which'
     ex which passswd, then ls -lisa <which passwd> , comes back as -rwsr-xr-x , th s is saying can se wners (roots) permissiont to edit, but only you stuff / entries
 SGUID - sam as SUID but with grouos
-  find / -perm 2000 2>dev/null
+  find / -perm 2000 2>dev/null -exec ls -la {} \;
 Sticky Bit - applied in shared directories where file itself can only be deleted by the owner, more than just the file can edit
     
-    
+
+man                 #lots, slow
+<command> --help    #less, not every comand might have
+man -k complresses  # man keyword search for comands and stuff
+apropos             #like man -k
+find loc of binary
+  whereis
+  which
+date
+cal
+
     
     
     
