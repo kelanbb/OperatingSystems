@@ -80,3 +80,36 @@ NTOSKRNL (once loaded, weather MBR or GPT)
               sends userinit to kill
     CSRSS
       allows to become role of client whenlooking up stuff...
+
+Find if using BIOS of UEFI
+ Type C:\Windows\Panther\setupact.log | findstr /i "detected boot enviroment"
+ or
+ bdcedit | findstr /i winload
+ or
+ bcdedit | findstr /i winresume  #will show if ran in cold or warm boot
+ or
+ msinfo32
+ 
+ BCDEDIT
+  identifier {current} // not current, not runnin, the ??? C:\ = current
+  path  //tells what the boot path used
+  
+  bcdedit /set description "Windows 9030"(by default, chnagec current unless otherwise specified)
+  bcdedit /set safeboot minimal   //will set safemode minimal, loads basic shell, can also use Network, activedirectroyrecovery (only for DC), alternateshell which allows for other shells besides ps and cmd, 
+  bcdedit /deletevalue safeboot
+                       alternateshell  //to load GUI normally
+          or
+  msconfig
+    can select startup
+    
+  
+msconfig can show services,
+  if want to change service, gerenally use custom (not MS) service 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
