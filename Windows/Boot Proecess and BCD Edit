@@ -1,0 +1,43 @@
+https://os.cybbh.io/public/os/latest/006_windows_boot_process/winboot_fg.html#_1_boot_process_overview
+
+Rootkits
+  drivers are easiest wa to install rootkits, by injeting / reverse engineering
+  3 types
+    Rootkit
+    Bootkit - rootkit specificslly targeting boot process
+    ...?
+  
+ host before anything, like bios
+ 
+ 
+ BIOS will only use MBR, UEFI uses GPT for this course
+  BIOS
+    MBR (Master Boot Record)
+      (if not MBR found , will not work / load)
+      active partition identified in the partition table
+      partition boot record (PBR) on the active partition is loaded 
+      code in the PBR loads bootmgr
+        bootmgr/bootmfrfw.efi
+          replaced pre-vista NTLDR
+      first 512 bytes on boot partition..?
+        only allows up to 4?
+      
+    Windows Boot manager (bootmgr)
+      manages the boot process
+    BCD
+      boot configuration Data store
+      replaced the boot.ini
+        boot menu options and settings on ESD (EFI System partition) \EFI\Microsoft\boot\BCD
+    OS Loader
+      (winload.exe) or (winresume.exe)
+        loads kernel (ntoskrnl.exe)
+          winload is used in cold starts, box fully powered off. (win10 by default uses Fast boot, Fast boot uses winresume instead of winload, hybrid, not really needed for SSD)
+          winresume is used when computer is put to sleep, not sutned off, doesn;t have to load OS again, just in hybernation
+            hybernation works by taking everything running in ram, entirety of OS and everything running, writes to disk (hybernate file in C drive), then powers off (shurdown is slow), when loads reads the winresume.exe and looks at hybernation file and loads everything
+  UEFI
+    GPT (GUI Partition Table)
+      UEFI does nto check if GPT exists like BIOS would with MBR, just chescks for drive...?
+    UEFI Boot Manager (bootmgrfe.efi)
+      manages boot process
+    BCD
+    OS Loader
