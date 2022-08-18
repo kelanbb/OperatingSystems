@@ -1,4 +1,5 @@
 https://os.cybbh.io/public/os/latest/006_windows_boot_process/winboot_fg.html#_1_boot_process_overview
+https://os.cybbh.io/-/public/-/jobs/698394/artifacts/os/modules/006_windows_boot_process/pages/4_winboot_process.html
 
 Rootkits
   drivers are easiest wa to install rootkits, by injeting / reverse engineering
@@ -21,6 +22,7 @@ Rootkits
           replaced pre-vista NTLDR
       first 512 bytes on boot partition..?
         only allows up to 4?
+      Looks at Volume Boot Sector, one of the partitions
       
     Windows Boot manager (bootmgr)
       manages the boot process
@@ -35,9 +37,46 @@ Rootkits
           winresume is used when computer is put to sleep, not sutned off, doesn;t have to load OS again, just in hybernation
             hybernation works by taking everything running in ram, entirety of OS and everything running, writes to disk (hybernate file in C drive), then powers off (shurdown is slow), when loads reads the winresume.exe and looks at hybernation file and loads everything
   UEFI
-    GPT (GUI Partition Table)
+    GPT (GUID Partition Table)
       UEFI does nto check if GPT exists like BIOS would with MBR, just chescks for drive...?
     UEFI Boot Manager (bootmgrfe.efi)
       manages boot process
     BCD
     OS Loader
+
+NTOSKRNL (once loaded, weather MBR or GPT)
+  loads
+    process manager
+      Process manager is how we actually interact with the system..
+      system idle process
+        technically not a proess
+    HAL.DLL
+    Load directory hive
+    device drivers
+    start paging Pagefile.sys <---> pagefile.sys (can configure pagefile.sys to be an SSD)
+    
+    
+    Session 0
+      will always be non-interactive
+      v
+    SMSS 0
+      launch wininit
+        initialises windows
+          launches LSASS.exe
+            only one who can handle logon credentials
+            take sin credentials , uses SAM, user authentication, only in session 0
+          launches SVCHOST.exe, loads ( automatic )servides, different from loading on initialization (boot) services.  Session 0 only
+            service that hosts services
+          launches Services.ese
+    SMSS (1)  //user based sessions, ie admin, normal, service account
+      CRSS
+      WINLOGON
+        service accounts dont logon, not locally
+        LOGINUI
+        USERINIT
+          loads user initialization settings
+          uniqe, whenever done loading everything, launches explorer, responds to it later
+            Explorer
+              sends userinit to kill
+    CSRSS
+      allows to become role of client whenlooking up stuff...
