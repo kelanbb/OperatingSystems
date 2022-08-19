@@ -1,0 +1,226 @@
+https://os.cybbh.io/public/os/latest/007_linux_boot_process/linboot_fg.html#_2_bios_and_uefi
+https://os.cybbh.io/-/public/-/jobs/698473/artifacts/os/modules/007_linux_boot_process/pages/5_LinuxBootProcess.html
+Source ^^
+
+
+BIOS vs UEFI
+------------
+BIOS
+------------
+UEFI
+------------
+
+
+Boot Order General steps
+------------------------
+Power on
+for BIOS
+BIOS
+  MBR
+  grub
+  Linux Kernel
+
+for UEFI
+UEFI
+  GPT
+    grub.efi
+    Linux Kernel
+
+One at Linux Kernel
+Linux Kernel
+  Init
+    SysV inir      or     Systemd Init
+      /sbin/init   or       /lib/systemd/systemd 
+        Executes sctipts      Executes *.units in taget.units to
+        in runlevels to
+      Bring System to desires login state
+      
+      "BIG MIKE GOT KILLED IN RUSSIA"  (SYSV)
+-----------------------------------------------------
+BIOS -Basic Input Output System
+  The machine’s BIOS or boot firmware loads and runs a boot loader.
+MBR -Master Boot Record
+  Find / has grub
+GRUB -Grand Unified Bootloader
+  The boot loader(“Grub” located in MBR) finds the kernel image on disk, loads it into memory, and starts it.
+Kernel
+  The kernel initializes the devices and its drivers.
+  The kernel mounts the root filesystem.
+  The kernel starts a program called init with a process ID of 1. This point is the user space start.
+Init (SysV or SystemD)
+  Init sets the rest of the system processes in motion via pre-configured runlevels.
+Runlevels
+
+
+sudo dmicode -t bios  #tells you if bios and other info
+sud parted -l #also finds where bios is
+
+read MBR for any given disk
+  needs to know which disk
+    lsblk #to find where
+    df -h #lists out all the disks and what space if free, and where/whats mounted
+  sudo xxd -l 512 (length of 512) -g 1 (group by 1 byte) /dev/sda (dev/vda...?) 
+    #rot downs block device stuff..?
+    #xxd command is hexdump of files
+      eb 63 90 is assembly code insruction to jump (63) to mem pos 63 then no op (90), going to start at every start of 512 (MBR)
+        jumps to line 0x60 (7th line) to index 3 (4th element)
+      magic number usually 55aa, at end
+  
+when messing with MBR, should make a copy
+  sudo dd if= /dev/sda (source file, if- in file) of=MBRcopy (outfile, where to go...) bs=1 (byte size) count =512 #dd command, allows to copy
+    will gove a DOS/MBR boot sector file type, cant cat / echo...?
+      to read, xxd the file, sudo xxd MBRcopy
+      
+GRUB
+  Grand Unified Bootloader
+  (not only bootloader, theres also lilo, also systemd offers one)
+  one purpose to load kernel
+  config files tell it what to do
+    /boot/grub/menu.list
+    /boot/grub/grub.cfg  --which kernel going to load...
+      can use to go to running mode like single mode
+      cat this file to read it
+      
+Kernel (during boot)
+  Heart of OS
+  manages inteeraction between OS and hardware
+  Monolithic Kernel (one big block to do eveerythigng ~27.8 million lines of C code)
+  Uncompress itself into RAM
+  establish memory management
+  detect CPU type
+  page tables
+  mounts root filesystem
+  process 0
+    kthreadd
+  executes /sbin/init (hard coded) or systemd daemon, PID 1
+    ls -l /sbin/init to determine init system using
+      if using systemd then /sbin/init is symbollic link to /lib/systemd/systemd
+    ps -(f?)p 1 also works to see if systemd or default
+  Paythread PID 2 to....???
+  
+  lsmod  #lists kernel modules
+    a module is like an extension to be able to interfece with hardware its not hardcoded to interact with
+    
+INIT
+  loaded by kernel from /sbin/init
+  initialization
+  start the managing process service
+    service and process manager
+    like big parent of all process
+      all process fork off see w/ pstree
+  init(sysv) (1983)
+    serial
+    scripts
+    inittab
+    runlevels
+  SystemD (2010)  /system management
+    parrallel
+    ini-like files  //generally easy to read
+    system.conf 
+    targets         //related to runlevels on an init based system
+    service
+    process
+    boot
+    home directory
+    login
+    etc.
+    manager
+    
+  for sysv
+    /etc/init.d/rc # (#  number  is 0 - 6)  
+    check /etc/inittab to see what run level is / troub;eshoot run level
+    ls /etc/rc3.d
+      see a bunch of S##name process, S = start, ## = order scripts execute, K = kill
+    ls -l /etc/rc1.d
+      see where these files are pointing / linked to
+    See current runlevel
+      cat /etc/inittab #for init /sysV
+  for systemd
+    #made to run things in parellel insead of having a slower sequential lod order that sysv uses
+    runlevels for systemd is targers
+      /etc/systemd/system
+        la -lisa lib/systemd/system/default.terget to see default target unit (default run level) #can also show link to graphica.target
+          cat /lib/sytemd/system/default.target | tail -b 8
+            requitements, needs to work, other targets
+            wants, optional, services
+    /etc/systemd/system #user creaed services
+    /lib/systemd/system #used to house services created by package maintainers
+      or /usr/lib/systemd/system
+    systemcrl to see / do what else systemd has
+      ex: systemctl list-dependencies graphical.target
+        color coordinated 
+          green active
+          white inactive
+          white circle disabled
+          circulat arroe restarting
+          red cross error
+        everything above first target is want
+      ex2:systemctl show -p Wants graphical.text
+      ex3:systemctl list-unit-files
+      ex3:ssytemctl cat graphical.target #tog et location and all eh info on the target instead of having to find / know the file path
+      
+  
+
+
+
+
+#sysV box is ministeruth
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
