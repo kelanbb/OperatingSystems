@@ -158,9 +158,24 @@ INIT
       ex2:systemctl show -p Wants graphical.text
       ex3:systemctl list-unit-files
       ex3:ssytemctl cat graphical.target #tog et location and all eh info on the target instead of having to find / know the file path
-      
+      systemctl does a lot, ca set aside cores for process and sruff, pu into UEFI, etc..
+    
+Etc/profile
+  read whenever called/login
+  customize user stuff
+  system-wide .profile file for the bash
+  .profile for for individual user (put in home, for interactive login shells)
   
-
+/etc/enviroment
+  requires a restart, runs at startup
+  global variables
+  
+etc/bash/bashrc
+  for sytem wide (since in etc)
+  used in specific instances
+  for interative nonlogin shells (also home/basrh)
+    doesnt ask for auth
+  
 
 
 
@@ -185,6 +200,8 @@ INIT
   
   
   
+  
+149
   
   
   
