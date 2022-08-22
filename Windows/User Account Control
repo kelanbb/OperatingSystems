@@ -1,0 +1,27 @@
+https://os.cybbh.io/-/public/-/jobs/698790/artifacts/os/modules/009_windows_uac/pages/6_UAC.html
+
+popups for running as admin is an example of uac, thinkgs like are you sure popups
+UAC is GUI only tool /service
+
+UAC is registry setting, can disable
+Registry key is located at "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+
+get-item HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+  the key UAC is is EnableLUA
+
+COLOR-CODED CONSENT PROMPTS
+Red - Application or publisher blocked by group policy
+Blue & gold - Administrative application
+Blue - Trusted and Authenticode signed application
+Yellow - Unsigned or signed but not trusted application
+https://git.cybbh.space/os/public/raw/master/images/uac-01.png
+
+
+./strings and ./sigcheck are sysinternal tools
+
+
+User Interfae Proviledge Isolation
+  secure desktio
+  uses ConstantProptHevaiviorAdmin
+       ConstantPromptBLABLA in the HKey above
+       
