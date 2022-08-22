@@ -79,6 +79,7 @@ get-ciminstance
     service controll manager
     query foos  for showsid, every service should have sid
       sc.exe showsid Power #goes off of service name, not service display name
+    sc.exe queryex type=service state=inactive #gives inactive service info, by def will show active
     get-service |select-object * gives more infomration
     get-service -property * | Where-object {$_.name -like '*DHCP*'}
       
