@@ -34,6 +34,24 @@ Awareness:
   #Why is that happening / what is the direct cause of anything I found to note
   #How is that happening / overall machanism is happening or whats occuring to cause stuff
   #if end up on somethin human readable, whats in there
+  #what interfaces and ip does box have
+    ifconfig #depricated
+    ip addr #instead of ifconfig, newer, or ip a
+  #see what ports are open on system
+    netstat -ntmp #n is numberic translation of port insteaf of the service, t is tcp ports, l for listening, p is what process is causing that to open
+    ss  #new command to replace netstat
+      ss -ntlp # as a normal user, dont have permission to the the p option so need to sudo ss -ntlp
+  #what routes does this box know
+    route   #old command
+    ip route (or ip r) #out of what intefeces does it use to get to certain networks
+  #what machines your box has taked to
+    arp   #old
+    ip neigh (or ip n) #also shows stale (talked to recently) and stale (has alked at one point but awhile ago...)
+  #check the firewall rules
+    iptables -L #need permissions, old, need to sudo
+    nft list table
+  
+  
   
 Linus distribution timeline examples:  
   mint is okay
@@ -98,7 +116,7 @@ find loc of binary
 date
 cal
 
-    
+cat /etc/shells lets you know what chells you can use    
     
     
     
