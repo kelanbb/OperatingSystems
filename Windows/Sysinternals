@@ -1,0 +1,55 @@
+There is a 32 and 64 bit version
+
+Several ways to acces sysinternals
+1. Net use
+2. As new ps drive
+3. invoke webrequest downlad
+4. invoke webrequest download and add to system env path
+
+
+procmon.exe / procmon64.exe
+  process monitor
+  prmary use is monitoring boot process
+  GUI only tool
+  
+autoruns64.exe
+  reads registry, detects to see what starts automatcally, ie drivers, registry settings, startup programs, etc..
+  color coded
+    pink no publisher info / digital signature info couldnt be verified / not exist, doesnt match anything
+    green , something
+    yellow, entry exists but nothing there (file looking at isnt there..?)
+    
+if file not found, skips it for ???
+
+Process explorer
+  procxp64.exe
+  heiarchal view of process
+  jump to location jumps to reg entry 
+  go to image goes to file location
+  properties > image> path > explore
+    goes to where binary is located
+
+Tcpview.exe
+  gives netstat like network listing
+  unlike netstat, this is dynamic, constantly refrshes
+  color coded
+    red, network connection temrinated
+    green, connection was made
+    
+need to check handles
+
+check.. find effective permissions file sysinternals
+  effective permissions are permissions are permissions profam use to execute..? what is pogramm allowed to do / wat permissions on ssytem
+
+
+
+
+
+
+
+
+
+
+autorun
+
+Process explorer is good...?
