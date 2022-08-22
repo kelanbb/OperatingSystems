@@ -87,13 +87,77 @@ get-ciminstance
         pathname is arg being passed to scvhost to launch
    
    
-   
-   
-   
-   
-   
-        
-  
   
 get-cimclass -classname * | measure ????
   cim class is grouping to help the kernel manage
+
+
+SCHEDULE TASK
+  schtasks.exe
+    schtasks.exe /query /tn #tn is taskname
+      ex: schtasks.exe /query /tn "\Microsoft\XbGameSave\XblGameSaveTask"
+          schtasks.exe /query /tn "\Microsoft\XbGameSave\XblGameSaveTask" /v /fo list #verbose mode formatted into a list, shows more
+  get-scheduletasks
+  task scheduler
+    whenever create new task, all saved in task schedule library, custom ones are directly in task scheduler library
+    
+    
+Steps to diagnose
+  look at process list
+    PS> get-pocess (not a lot)
+    get-ciminstance win32_process |select * | select processid, parentprocessid, name, commandline | out-file $home\desktop\processwow.txt -width 1024
+      try to lok what ypu  mightve seen popup ir powershell calc
+        -windowstyle hidden is no good
+      get-ciminstance win32_process |select * | select processid, parentprocessid, name, commandline | where {$_.name -like "*powershell*" }
+        get PID
+      get-ciminstance win32_process |select * | select processid, parentprocessid, name, commandline | where{ $_.processid -lke "8848" } | fl
+        work up from here, parent process
+          once get to a point where it does not give more info, then have all info needed
+            get-ciminstance win32_process |select * | select * | where {$_.processid -like "###"} | fl
+            get-ciminstance win32_process |select * | select * | where {$_.name -like "*calc*"} | fl   *** correct...?
+              work up from here
+              should see powershell being run by conhost.exe
+                means cmd or ps
+              from here can schtasks.exe
+                care about top stuff
+                  ready and running
+                    look at the ones that are importanr and schtasks.xe /query /tn "nameofTask" /v/ fo list
+                      see what its doing, running, from what, when it sxecutes (schedule type, time)
+              check any network connections
+                netstat -anob (b is binary thats executing it)
+                or get-nettcpconnections
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
