@@ -1,0 +1,53 @@
+Goals
+-----
+understandinh the heiarchy of processes / services -- understand what's normal and whats abnormal
+find malicious processes that mask themselvs as normal processes
+apply solution to finding malicous process and services
+understanf the service configuration post-modification behaivior prior to challenge
+
+Process validity - 
+
+
+Discovering hidden process, services, and finding normal and abnormal activity -
+
+
+
+majority fo time in dll hikacking, not writing to disk, mostly memory. actually need to look for process validty and services.
+
+
+difference between process and service:
+svchost is proces that hosts all services
+process requires interaction to start, current ecectution of code running
+  requires interaction in some form
+service runs in the background with minimal to no interaction (only interaction is really staty, stop, restart)
+  background, quiet
+
+DLL
+----
+library that contains 'pointers' to rescources available for other programs to interact with
+  functions, executables, other libraries, etc
+
+GET PROCCESSES
+---------------
+
+tasklist
+  get-member tasklist
+  is a binary, built into windows, gives tasks process
+
+get-process
+  defalt gives more than tasklist
+
+task manager
+  taskmgr
+  can have hidden running process bc of apit stuff
+  
+get-ciminstance
+  get-siminstance win32_process | measure 
+  vs
+  get-prcess | measure # to find the difference in lenth of discovered process between these
+  handle is rescource progam is using reaching out to another thing / trying to access
+  get-ciminstance win32_process | select * # for a better format
+  
+  
+get-cimclass -classname * | measure ????
+  cim class is grouping to help the kernel manage
