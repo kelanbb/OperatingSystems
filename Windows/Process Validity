@@ -24,8 +24,10 @@ service runs in the background with minimal to no interaction (only interaction 
 
 DLL
 ----
-library that contains 'pointers' to rescources available for other programs to interact with
-  functions, executables, other libraries, etc
+  library that contains 'pointers' to rescources available for other programs to interact with
+    functions, executables, other libraries, etc
+DLL injection / hijacking is talking the handle a program is usingand chaning it, doesnt change the actual proess but stll makes it do soemthing you want through the handle
+
 
 GET PROCCESSES
 ---------------
@@ -36,6 +38,7 @@ tasklist
 
 get-process
   defalt gives more than tasklist
+   good to verify handles (shows locations)
 
 task manager
   taskmgr
@@ -47,6 +50,48 @@ get-ciminstance
   get-prcess | measure # to find the difference in lenth of discovered process between these
   handle is rescource progam is using reaching out to another thing / trying to access
   get-ciminstance win32_process | select * # for a better format
+  get-cmiinstance win32_process  where -property name -like *LSASS* | select *
+    or get-ciminstance win32_process |where {$_.name -like "*LSASS*'} | select *
+    
+    when looking at results of proces, good to look st
+      proces name, see what actual name is, see if name matches with other things inthe desc
+        if ever questioning a process, can get an md5 of proces and put into a virustotal 
+          okay to upload a hash than binary              
+   get handle of a process   
+     get-process -name lsass | select -expandproperty modules
+      expand format to see all the text instead of ... at end
+        get-process -name lsass | select -expandproperty Modules | format-table -warp
+     tasklist /m /fi "IMAGENAME eq lsass.exe"
+      
+   
+   
+   
+   GET SERVICES
+   ------------
+   a service runs in the backgound, if a servie is running it is a process, windows makes a service process a service by service host
+    Get-WmiObject win32_process | Select-Object -Property Name, ProcessID, ParentProcessID, Path, Commandline | ft
+      see svchost.exe, shows the command line used to launch a sercice, launched based on name ,not display name
+        blabla...svchost.ex -k RPCSS -p launch process by name
+                            -k NetworkService -s Termservice does ?
+                              -k shows legitimate launched service
+   get-service
+   sc.exe
+    service controll manager
+    query foos  for showsid, every service should have sid
+      sc.exe showsid Power #goes off of service name, not service display name
+    get-service |select-object * gives more infomration
+    get-service -property * | Where-object {$_.name -like '*DHCP*'}
+      
+      wmionj by name
+        pathname is arg being passed to scvhost to launch
+   
+   
+   
+   
+   
+   
+   
+        
   
   
 get-cimclass -classname * | measure ????
