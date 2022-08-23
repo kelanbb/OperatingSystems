@@ -1,1 +1,38 @@
+find pid of sysv init daemon
+  ps -elf | grep -i init
+  
+  find child process for pid <n>
+    ps --ppid <n> -lf
 
+find parent process of a shell
+  ps -Nlf --forest | grep -B <maybeuse-Bw/#> -i <user or whatever using to find shell>
+    look at heiarchy and take top fo haiarchy or direct parent or whatever
+    
+fid <nth> dfile descriptor for <x> process
+  sudo lsof -c <x>
+    look for <nth> enrey with a FD colum matchonf <#>[r,w,u]
+
+when looking for port of process cand catn use netstat -p
+  netstat -anop and look for open port thats is questioable
+    ps -elf | grep <port>
+ 
+ identify arguments given to paocess service <x>
+    ps -elf | grep <x>
+ 
+ List all the proc directories
+   ls -l /proc/
+  then
+ Grab the PID of a process.
+   ps -elf | grep sshd
+  then
+ List contents for that PID directory.
+  sudo ls -l /proc/14139
+  
+  
+can use lsof to get a type
+  if sayd reg then readable fromat
+  
+for process / become zombie process
+  htop  then ps -elf | grep <pid or name}>
+    get PID then lsof -p <pid>
+      look at files
