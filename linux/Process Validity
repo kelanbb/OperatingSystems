@@ -30,7 +30,6 @@ User Process
       processes are said to run as user
 
 
-
 Process Ownership
   User
     Entity that can run process and own files; 
@@ -49,9 +48,16 @@ Process Ownership
     
     
 System Calls
+  everything is done with system calls
+    ie run ls command
+      shell forks copy of itself using fork then uses exec on frok to run ls , runs, then is killed
+        Shell->fork()-->shell
+                      '->copy of shell->exec(ls)->ls
   iteraction between a process and kernel
   Fork()
     when process calls fork(), kernel creates a nearly identical copy of process
+      capital Cron is child process
+        theres a cronjob running
   exec()
     when process calls exec(program), kernel starts program, replacing current process
 
@@ -90,16 +96,19 @@ See running process
 Orphan an Zombie (Defunct) processes
   Orphan
     parent exited
-    adipted by sbin/init (with PID of 1)
+    adipted by sbin/init (or systemd) (with PID of 1)
       ex to make orphan: disown -a && exit
         closes  shell and force all children to be adopted
   Zombie (defunct)
+    did what it's supposed to do but parent wo awk its done and wont terminate it, stays around, uaually cant be killed until parent is
     completed process, but still has entry in process table
       waiting on parent to awknowledge or terminate
     cant be terminated with kill since its alreadt completed execution
       can only be killed if parent is killed
     doesnt use rescourse
-      takes up process table entry
+      takes up process table entry (finite)
+    use ps -Nlf --ppid 2 --forest
+      the 2nd fiels w/ S,Z,etc.. shows if parent, zombie, or whatever
   Fork Bomb
     DOS attk where a process continually replicated itself to deplete system rescources
       remedy - 'ulimit -u 30'
@@ -107,19 +116,28 @@ Orphan an Zombie (Defunct) processes
         
   Daemns (Servoces)
     program that runs in background
+      ie, cron, 
     All daemons are orphans
       since init is parent would require shutdown for parent to die, meaning persistant
     Daemons purpose is to manage/monitor  a service
       {status, start, restart}
     Malicious process sometimes orphaned and named o look like daemon process
       ps --ppid 1 -lf
+        lists lonf formated list of app proess with PPID of 1
+          list all oprhan process
+    to interact w/ sercices
+      sysv
+        services
+      systemd
+        ssytemctl
     
   Jobs Control
     'jobs'
       display list of jobs running in the background
     'fg' / 'bg'
       push / pull jobs to / from the foreground / background
-    ‘[ctrl -z]’ / ‘kill -19’ -  
+        pull to foreground to intereact with them, then can put to background
+    ‘[ctrl -z]’ / ‘kill -19’   
       stop / suspend the job
     ‘kill -9 <PID>’ / ‘pkill -9 <process name>’
       -19
@@ -132,19 +150,25 @@ Orphan an Zombie (Defunct) processes
           SIGKILL(15)
             termination signal, right way
               app can intercept signal and initiate shutdown tasks like temp file cleanp
+              kill process gracefully
       -9
         Kill Process
           SGKILL(9)
             kill signal, extreme, 
               only use if SIGTERM doesnt work, no shutdown tasks
-  
+              kill process that downt want to
+      kill -l
+        list of all kill signals that can be sent
+        
   
 Cron Jobs
   cron daemon
     checks directories once a minute, and executes any command specified that match the time:
       /var/spool/corn
-      /etc/cron.d
-      /etc/crontab
+      /etc/cron.d     #system cron jobs, like mainanence tasks
+      /etc/crontab    #system cron jobs, like maitanance tasks
+    When Top or ps, whatever, capital Cron is child process
+      theres a cronjob running
   2 types of cron jobs
     System Cron Jobs
       run as root
@@ -157,13 +181,15 @@ Cron Jobs
         ‘crontab -u [user] file’
           sets users crontab file to the contents of listed file
         ‘crontab -l -u [user]’ - 
-          Displays user’s crontab contents
+          lists user’s crontab contents
+            need root provs to see other users
         ‘crontab -r -u [user]’
           Removes user’s crontab contents
         ‘crontab -e -u [user]’ 
           edits user’s crontab contents
         crontab jobs run with the permissions of the owner of the crontab file
-        stored in /var/spool/crontabs/
+        stored in /var/spool/cron/crontabs/
+          stoed unders users name folder who made job
         Crontab Syntax
           * * * * * /directory/and/command
           | | | | |
@@ -173,10 +199,62 @@ Cron Jobs
           | +---------- Hour              (range: 0-23)
           +------------ Minute            (range: 0-59)
   
+ps -Nlf --ppid 2 --forest
+  can see bash is running file called offerint for user Gothmog
+    capitl CRON means cronjob, scheduled task
+      see user is Gothmog, look at their jobs
+
+
+How processes work
+  what /where do commands get info from...?
+    from proc directory
+      contains heiarchy of special fiels which represtnt current state of kernel
+        peer into the kernel view of system
+    la /proc
+      numbers are process ids
+      la /proc/18880
+        see the tuff process id 18880 using
+          need sudo to run
+            sudo ls -lisa /proc/18880
+              can look for anything going on, ie symbollic linkm can se that linked to/ whats runnning
+ Evry process needs to open files to do what they need to do
+  Every process access files in order to work, process keep track of ope files using file descriptors
+  sudo lsof (vew file descriptors)
+    list all the open files for processes on the system
+      ex: know ssh is runninf on linux since remoted in
+        sudo lsof -p 18880
+          all process running for ssh
+            only care about the numbered file descriptors (streams)
+              file descriptor 0 is stdin
+                              1 stdout
+                              2 stderr
+                              3 onwards other files, like sockets (sockets make up ip and a port)
+   sudo lsof -c sshd
+     looks for activel running process to open stuff for, all the sshd, whereas number is specific one...??
+     #u
+     #r
+     #w
+     
+ List all the proc directories
+   ls -l /proc/
+  then
+ Grab the PID of a process.
+   ps -elf | grep sshd
+  then
+ List contents for that PID directory.
+  sudo ls -l /proc/14139
   
+ List all systemd services
+  sudo sytemctl list-units --all
+    list all units ssytemd has as loaded or attempted to load, even inactive
+  sudo sytemctl list-units --all --type sevice
+    list all service units
   
-  
-  
+  if checked all the conjobs and cant find roblem for a reoccuring problem
+    systemd timers
+      timers can be attached to service and set of often runs
+        timers are units, can be searched for
+          --type timer
   
   
   
