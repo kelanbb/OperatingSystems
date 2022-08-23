@@ -1,0 +1,217 @@
+https://os.cybbh.io/-/public/-/jobs/698910/artifacts/os/modules/010_linux_process_validity/pages/6_LinuxProcesses.html
+https://os.cybbh.io/public/os/latest/010_linux_process_validity/linproc_fg.html#_wip_terminal_learning_objectives_tlo
+
+
+Kermel Process
+  kernel-space process forked from [kthreadd]
+    PID 2 for kthreeadd spawned process
+  manage hardware
+  directly handled by kernel
+  own memory space
+    unrestricted access to the processor and main memory
+      called 'kernel space'
+        crashing process can crash system
+  high priority
+  Identified with [square brackets] (usinf the -f option with ps)
+    if process has [] then kernel process
+  
+
+User Process
+  kernel starts /sbin/init (kernel is hard coded to load)
+  user-space process orked from /sbin/init  or a direcr anscestor
+    PID 1
+  User Mode
+    restricts acess to a small subset of memory
+    safe CPU operations
+  'User space'
+    parts of main memory that user process can access
+      if process crashed then usually cleaned up easily by kernel
+    Every user space proces shas a user owner
+      processes are said to run as user
+
+
+
+Process Ownership
+  User
+    Entity that can run process and own files; 
+      can only modify / interact w/ files  /process that they own or have bene shared with
+        generally /user/sbin/nologin for user accounts that are to manage systems like a web server data user...
+  Effective User ID (EUID)
+    defines the access rights for a process  
+  Real user ID (RUID)
+    indicates who initiated process
+    defines the user that can interact with the running process most significantly
+      what user can kill and send signals to process
+        exist rimarly to support permissions and boundaries
+    EX SUDO
+        actually : student account, real actual account
+        running as : root, effectively root
+    
+    
+System Calls
+  iteraction between a process and kernel
+  Fork()
+    when process calls fork(), kernel creates a nearly identical copy of process
+  exec()
+    when process calls exec(program), kernel starts program, replacing current process
+
+
+See running process
+  PS
+    alone doesnt ive a lot
+     ps -elf good for giving more info
+      -e option for verything
+        no filtering since giving everything
+      -l for long listing
+      -f for formatting
+     ps -Nlf --ppid 2
+      add --forest for visual heiarchy of process
+        pipe to geop -B 8 ps to get a look at ps keword in ps and show 8 lines above
+          -B before a certain num if lines
+          -A for after for a certain num of lines
+        --context can give lines above and below
+          ex --context=8
+  Top
+    standard tility w/ linux distro
+    dynamic process listing
+    tells info on system
+      average load, how long, memory usage
+    F key while in top lets one add fields
+    shift+v heiarchal view
+  Htop
+    generally needs to be installed
+    shows how many spu has, graph os mem utilization
+    f5 key (tree <-> sorted) toggle
+    f2 change fields like F does for top
+      can also change display like color and format
+      PPID and tree view are very helpful
+   btop another proces monitor
+   
+Orphan an Zombie (Defunct) processes
+  Orphan
+    parent exited
+    adipted by sbin/init (with PID of 1)
+      ex to make orphan: disown -a && exit
+        closes  shell and force all children to be adopted
+  Zombie (defunct)
+    completed process, but still has entry in process table
+      waiting on parent to awknowledge or terminate
+    cant be terminated with kill since its alreadt completed execution
+      can only be killed if parent is killed
+    doesnt use rescourse
+      takes up process table entry
+  Fork Bomb
+    DOS attk where a process continually replicated itself to deplete system rescources
+      remedy - 'ulimit -u 30'
+        sets max process a user can run
+        
+  Daemns (Servoces)
+    program that runs in background
+    All daemons are orphans
+      since init is parent would require shutdown for parent to die, meaning persistant
+    Daemons purpose is to manage/monitor  a service
+      {status, start, restart}
+    Malicious process sometimes orphaned and named o look like daemon process
+      ps --ppid 1 -lf
+    
+  Jobs Control
+    'jobs'
+      display list of jobs running in the background
+    'fg' / 'bg'
+      push / pull jobs to / from the foreground / background
+    ‘[ctrl -z]’ / ‘kill -19’ -  
+      stop / suspend the job
+    ‘kill -9 <PID>’ / ‘pkill -9 <process name>’
+      -19
+        Stop Process
+          SIGSTOP(19)
+            pause signal
+              lets you contunue later, does not  kill process
+      -15
+        End Process
+          SIGKILL(15)
+            termination signal, right way
+              app can intercept signal and initiate shutdown tasks like temp file cleanp
+      -9
+        Kill Process
+          SGKILL(9)
+            kill signal, extreme, 
+              only use if SIGTERM doesnt work, no shutdown tasks
+  
+  
+Cron Jobs
+  cron daemon
+    checks directories once a minute, and executes any command specified that match the time:
+      /var/spool/corn
+      /etc/cron.d
+      /etc/crontab
+  2 types of cron jobs
+    System Cron Jobs
+      run as root
+      rigidly scheduled
+      perform system-wide maintenance taks
+        ie cleaning out /tmp o rrotating logs
+      controlled by /etc/crontab
+    User Cron Jobs
+      use 'crontab' command
+        ‘crontab -u [user] file’
+          sets users crontab file to the contents of listed file
+        ‘crontab -l -u [user]’ - 
+          Displays user’s crontab contents
+        ‘crontab -r -u [user]’
+          Removes user’s crontab contents
+        ‘crontab -e -u [user]’ 
+          edits user’s crontab contents
+        crontab jobs run with the permissions of the owner of the crontab file
+        stored in /var/spool/crontabs/
+        Crontab Syntax
+          * * * * * /directory/and/command
+          | | | | |
+          | | | | +---- Day of the Week   (range: 0-7, 1 = Monday)
+          | | | +------ Month of the Year (range: 1-12)
+          | | +-------- Day of the Month  (range: 1-31)
+          | +---------- Hour              (range: 0-23)
+          +------------ Minute            (range: 0-59)
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
