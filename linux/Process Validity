@@ -255,6 +255,7 @@ How processes work
       timers can be attached to service and set of often runs
         timers are units, can be searched for
           --type timer
+      ssytemctl cat anacorn.timer
   
   
   
