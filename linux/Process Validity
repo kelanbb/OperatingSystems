@@ -231,9 +231,9 @@ How processes work
                               3 onwards other files, like sockets (sockets make up ip and a port)
    sudo lsof -c sshd
      looks for activel running process to open stuff for, all the sshd, whereas number is specific one...??
-     #u
-     #r
-     #w
+     #u = read,write
+     #r = read
+     #w = write
      
  List all the proc directories
    ls -l /proc/
@@ -257,8 +257,15 @@ How processes work
           --type timer
       ssytemctl cat anacorn.timer
   
+can use lsof to get a type
+  if sayd reg then readable fromat
   
-  
+for process / become zombie process
+  htop  then ps -elf | grep <pid or name}>
+    get PID then lsof -p <pid>
+      look at files
+
+
   
   
   
