@@ -36,3 +36,20 @@ for process / become zombie process
   htop  then ps -elf | grep <pid or name}>
     get PID then lsof -p <pid>
       look at files
+      
+id file w tcp/udp port <port#>
+  ps -elf | grep <port#>
+    lsof like usual
+    or
+  look up port service
+    ps grep port service
+      lsof
+
+open port, find how process persists
+
+
+persistance defined here: /etc/inittab
+      
+      
+      
+      
