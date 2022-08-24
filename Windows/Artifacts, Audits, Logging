@@ -79,29 +79,87 @@ WINDOWS BACKGROUND ACTIVITY MODERATOR (BAM)
 ------------------------------------------
   BAM is windows service
     Controls activity of background applications
+  Provides
+    full path of an executable
+      can be good to know to spot any abnormal file locations
+    last execution date/time
+  Location
+    HKLM:\SYSTEM\CurrentControlSet\Services\bam\UserSettings (1709-1803)
+    HKLM:\SYSTEM\CurrentControlSet\Services\bam\State\UserSettings (1809-newer)
   Get-Itemproperty 'HKLM:\SYSTEM\CurrentControlSet\Services\bam\UserSettings\*'
     (Windows 1709 & 1803)
+    Get full file path of whatever exe ran and last time ran, and who ran it
+      Will have \device\HardDiskVolume1 format instead of C:\
   Get-Itemproperty 'HKLM:\SYSTEM\CurrentControlSet\Services\bam\state\UserSettings\*'
     (Windows 1809 and newer)
-  
+  Show all users BAM artifacts / Single User
+    wmic useraccount  get caption,sid | more
+      Can set SID
+       then
+      HKLM:\SYSTEM\CurrentControlSet\Services\bam\State\UserSettings\S-1-5-21-1584283910-3275287195-1754958050-1005'
+        put tgt user SID to show BAM artifact for user
+        
 RECYCLE BIN
 -----------
   Important location on windows file system
    can help accomplish forensic investigation
+  Content identified by (In Recycle Bin):
+    SID - determine which user deleted it
+    Timestamp - When deleted
+    $RXXXXXX - content of deleted files
+    $IXXXXXX - original PATH and name
+  Location
+    C:\$Recycle.bin
+      hidden system folder
   gci 'C:\$RECYCLE.BIN' -Recurse -Verbose -Force | select *
+   or
+    gci 'C:\$RECYCLE.BIN' -Recurse -Verbose -Force | select FullName
+      Find Contents of RB
   gci 'C:\$RECYCLE.BIN' -Recurse -Force
-  
+    will look at all user's/SID contents
+  Match SID to user
+    wmic useraccount where 'sid="S-1-5-21-1584283910-3275287195-1754958050-1005"' get name
+  Read content of files in RB:
+    Get-Content 'C:\$Recycle.Bin\S-1-5-21-1584283910-3275287195-1754958050-1005\$R8QZ1U8.txt'
+      Use match above to get the user
+  gci "C:\`$Recycle.bin" -recurse -Force
+    look at other users recycle bins
+ gci 'C:\Recycle.Bin' -force -recurse | foreach-object {if (($_.extension) -like ".txt") { if ($_.name -like "`$R*") { Write-host $_.name -NonewLine ; Write-Host "--->" -Forgroundcolor green -NoNewline ; Get-content $_.fullname } } } 
+      
 PREFETCH
 --------
   Prefetch files are created by operating system when application is run from specific location for first time
+    for speeding up spplication startup process
+  Only shows files that have ran
+    access, launched , who launched
+    pointers to where its from
+      also keeps copy of entire binary
+    prefetch file for calc.exe would appear as CALC.EXE-0FE8F3A9.pf
+      0FE8F3A9 is a hash of the path from where the file was executed
+    Location:
+      C:\Windows\Prefetch
+    can reveal evidence of program execution got particular use or from a particular location
   gci -Path 'C:\Windows\Prefetch' -ErrorAction Continue | select * | select -first 5
 
 JUMP LISTS
 -----------
   Windows 7-10 taskbar
     made to allow users to 'jump' / access items the have frequently or recently used quickly and easily
-  gci -Recurse C:\Users\*\AppData\Roaming\Microsoft\Windows\Recent -ErrorAction Continue | select FullName, LastAccessTime
-  
+  Stores in specific users profile
+  gci -Recurse C:\Users\*\AppData\Roaming\Microsoft\Windows\Recent -ErrorAction Continue | select FullName, LastAccessTime | ft -wrap
+    look at jump list
+    Other ways
+      can do lastaaccesstime, creationtime, name
+        timeline analysis
+    can gc <file> on anything found
+      can show absolte path of the file
+  Location
+    C:\%USERPROFILE%\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations
+      (C:\Users\king\AppData\Roaming\Microsoft\Windows\Recent)
+    In Explorer:  
+    C:\%USERPROFILE%\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations
+      (C:\Users\king\AppData\Roaming\Microsoft\Windows\Recent)
+      
 RECENT FILES
 ------------
   Registry Key
@@ -109,25 +167,78 @@ RECENT FILES
     Will track overall order of the last 150 files or folders opened
   List files in recent docs
     gci 'REGISTRY::HKEY_USERS\*\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs'
+      going through every user
   Convert File Hex to Unicode
     [System.Text.Encoding]::Unicode.GetString((gp "REGISTRY::HKEY_USERS\*\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs\.txt")."0")
+      Change file extension at and to get specific file  type wanted
   Convert all of a users values from HEX to Unicode
     Get-Item "REGISTRY::HKEY_USERS\*\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs\.txt" | select -Expand property | ForEach-Object { [System.Text.Encoding]::Default.GetString((Get-ItemProperty -Path "REGISTRY::HKEY_USERS\*\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs\.txt" -Name $_).$_)}
+     
+  Location:
+    HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs
+    HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs\.txt
 
-
+Browser Artifacts
+-----------------
+  Stores details for each user account
+  Record num of times a site visited (frequency)
+  Can list files that were opened from remote sites and downloaded to the local system
+  Histroy will record access to the file on the website that was acessed via link
+    .\strings.exe 'C:\Users\<username>\AppData\Local\Google\Chrome\User Data\Default\History'
+  Find FQDN of SQLite Test Files
+    $History = (Get-Content 'C:\users\<username>\AppData\Local\Google\Chrome\User Data\Default\History') -replace "[^a-zA-Z0-9\.\:\/]",""
+      $History| Select-String -Pattern "(https|http):\/\/[a-zA-Z_0-9]+\.\w+[\.]?\w+" -AllMatches|foreach {$_.Matches.Groups[0].Value}| ft
+  Location of SQLite text files
+    Frequency
+      \strings.exe 'C:\users\andy.dwyer\AppData\Local\Google\Chrome\User Data\Default\History' -accepteula 
+        links that were "clicked: on while on a site
+    Most Visited
+      strings.exe 'C:\users\andy.dwyer\AppData\Local\Google\Chrome\User Data\Default\Top Sites'
+    User Names
+      strings.exe  'C:\users\andy.dwyer\AppData\Local\Google\Chrome\User Data\Default\Login Data'
+        sites that captures were user creds were entered
+    
 AUDITING
 ===============
   Auditing generally used to see where network is at, see where complicance is to see vuln
   See what is the weakness in netowork
     this can determine if threat has to work hard / be creative to get in or not
+  how to query everything for auditing
+    auditpol /get /category:*
+      what we currently have set for auditing
+  Set auditing
+    Rt click <file> on the desktop > Properties > Security > Advanced > Auditing > Continue > Add > Select a Principle > Type <username> (andy.dwyer) > Check Names > Ok >  Full Control > Ok > Apply > Ok
 
+WINDOWS EVENT LOG
+-----------------
 
+  Application
+    Contains events logged by applications
+  Security
+    Contaisn events such as valic/ invalid logon attempts and other events related to rescource use like creating, opening or deleting files.
+  System
+    Contains events logged by system components, such as driver failures other system component to load during startup
+  CustomLog
+    Contains events logged by applications that create a custom log.
+      Using a custom log enables an application to control the size of the log or attach ACLs for security purposes without affecting other applications.
+  Locations:
+    *.evtx files acced w/
+      1. Windows event view application
+          View in windows event log viewer w/ GUI
+            details > friendly view to have a good view on log
+      2. Get-Eventlog (PS)
+         Get-WinEvent (PS)
+      3. wevtutil (cmd)
+  Query Logs ( 2 ways )
+    Get-EventLog -Logname *
+                 -logname security -message "remote"
+                   look for word "remote*" in security logs
+                  also | ft -wrap at end
+    Get-WinEvent
 
-
-
-
-
-
+Powershel Logging
+  enabled by default on windows
+  smartcard can encrypt scripts
 
 
 
