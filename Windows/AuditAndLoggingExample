@@ -1,1 +1,6 @@
+Sysint tool to read the SQLite3 database w/ web history of browser (ie chrome)
+  strings.exe
 
+
+search for a file and look for acess time
+  gci -path C:\ -Recurse | Where-Object {$_.name -like "<fileName>"} | select LastAccessTime, FullName
