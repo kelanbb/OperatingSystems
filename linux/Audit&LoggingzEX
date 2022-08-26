@@ -1,0 +1,7 @@
+kern.!=info                    @IP:port
+  means all severity but info
+    7 total
+  facility 0
+  @=udp
+
+  
