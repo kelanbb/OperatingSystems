@@ -73,13 +73,47 @@ Volatility Program
       dump a process to an executable file sample
         can use on virustool
           only send hash
-      .\volatility_2.6_win64_standalone.exe -f ".\cridex.vmem" --profile=WinXPSP2x86 procdump 1640 -D .
+            get-filehash <file>
+      .\volatility_2.6_win64_standalone.exe -f ".\cridex.vmem" --profile=WinXPSP2x86 procdump -p 1640 -D .
         procdump on PID 1640 and into directory . (pwd)
-      
-      
-      
-      
-      
+    memdump plugin  
+     get memory dumo fo a particulat process
+      see what process was doing
+     .\volatility_2.6_win64_standalone.exe -f ".\cridex.vmem" --profile=WinXPSP2x86 memdump -p 1640 -D .
+        then..
+      net use * \\live.sysinternals.com\tools      
+       z:\strings.exe -accepteula "1640.dmp" > 1640.txt
+        can open w/ np++, search for things like ips or anything bad
+          if find ip address can use volitility
+     connections
+      prints list of open connections
+      .\volatility_2.6_win64_standalone.exe -f ".\cridex.vmem" --profile=WinXPSP2x86 connections
+     connscan
+      pool of tcp connections made in general
+        active and recently closed
+      .\volatility_2.6_win64_standalone.exe -f ".\cridex.vmem" --profile=WinXPSP2x86 connscan
+        can ip lookup
+     looking for processes
+      pslist
+      pstree
+      psscan
+        give phyical memory address of processes
+     see what dll process is using
+      dlllist
+        see list of whats using
+      dlldump
+        grab dll
+     Netowork srtifacts
+      connection
+      connscan
+     Registry analysis
+      hivedump
+        dump hive
+      hivelist
+        list all hives
+      dumpregistry
+        dump whole registry
+      b
       
       
       
