@@ -24,4 +24,11 @@ User Interfae Proviledge Isolation
   secure desktio
   uses ConstantProptHevaiviorAdmin
        ConstantPromptBLABLA in the HKey above
-       
+      xfreerdp /u:andy.dwyer 
+      
+      
+      /v:010050037234 
+      
+      
+      /dynamic-resolution +glyph-cache +clipboard
+  
