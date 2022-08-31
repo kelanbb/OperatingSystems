@@ -1,0 +1,74 @@
+Host enumeration
+  primarly focus on process validity
+    why stuff is happening
+  Where am I?
+  Who am I?
+  What am I allowed to do?
+    sudo -l
+  What is going on?
+  What is that?
+  Why is that happening?
+  How is that happening?
+  What is in there? (if file is human readable)
+  
+  netsowk acivity
+    netstat
+    ss
+      sudo ss -ntlp
+         port nubers instead of service its assuming, tcp, listening ports, process attatched to (need sudo)
+         if see weird port number, can look at process, PPID, etc..
+          can use htop
+          can use lsof (not recommended, lookng at text files and static file stuff)
+          can use top
+          can use ps -elf (snapshot)
+            can give options / commands on program
+          PPID is 1
+            could be (like) a service since ppid 1
+            if on sysv
+              look on init
+            systemd system
+              etc/systemd/system for services
+              or lib/systemd/service
+            PPID random number
+              pslist --forest --context:3
+                in forest tree see a CRON
+                  (mdadom,popularity are legit)
+                  mean cronjob
+                    child proces sof main con process
+                      user who runs it is the owner of process
+                        check that user cronjob
+                          sudo crontab -l -u student (if student is running CRON)
+                          var/spool/cron/crontabs
+                            user cronjobs
+                      if root runs cronjob
+                        etc/crontab
+                        etc/cron.d
+                        var/spool/cron/crontabs
+                 if fix crontab and still persistance
+                 locations of persitance
+                  timers
+                  service / processes /cronjobs
+                  could check tmp
+                  could check init (on sysv)
+                  check configuation files on system
+                    /etc/
+                        bash.bashrc
+                          system wide fiile for interactive non login shells; used for sstem wide profiles, all users on bash
+                        profile
+                          system wide file for interactive login shells; used for when you log in
+                          if persistance in this file
+                            first need to log in
+                          profile.d for shell scripts..?? 
+                         both of these can have scripts in them for when people log in
+                  
+                          
+              
+              
+              
+  Systemd
+    process
+    network
+    darmons
+    ..more
+          
+  
