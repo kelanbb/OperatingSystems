@@ -1,0 +1,70 @@
+A good portion of stuff might not be needed
+ps and sysinterernals
+  know commands to get sysinternals / slack commands
+    net use * \\live.sysinternals.com\tools
+      check drive net use or get-psdrive
+View netowrk connection stuff
+look for unuaual ports
+  tcpview (sysint)
+  netstat
+    stat -anob
+      b gives binary
+  get-nettcpconnections
+
+find process
+  get-process
+    get-process svshost | select name,id,path (gives relevent info you want on svchost processes)
+  (sysinternals)
+    process-explorer
+    autoruns gives lots and lots
+  taskmanager
+  
+auditing and logging
+  things that are relevant and places to check for artifacts
+    recyclebin
+    bam
+    prefetch
+      get-childitem -path C:\Windows\prefetch\
+        scrol through look
+    userassist
+      get-itemproperty "HKCU:\Software\Microsoft\Windows\CurrentVersin\Explorer\UserAssist\{ahjbdhadlsablfhkjdfh-9926...9EA}\count"
+      take note of the output
+      know regkey path
+      ROT13 encryption
+      userasssit guid have sinc all same
+      
+      
+#1 location to wite doown since things in here run utomatically
+      runkeys
+        machine and user
+        check w/ reg-query
+        get-item
+          iff see message saying file doesnt exist when looking for file, that is suspicious
+          
+scheduled tasks (for persistance)
+  taskscheduler
+    just look for custom jobs, not microsoft ones
+  autoruns
+  blank statemnts
+  
+ Profiles (day1)
+  powershell profule
+  users profiles
+  all users all hosts
+  check to see if exist with test-path
+    tells erather profile madee or not
+    depending on how open ps detemines how profiles checked
+    SLACK has script to check
+    
+Terminology in question
+  what is mechanism
+    what casued something to happen
+      ie file in runkey for malware (persistanec)
+      
+      
+NOGO ]  
+  gc or cat, get strings binaries
+  dll grabbing stuff
+  Names are okay for the files and binaries, dll and stuff
+  NOT looking at drivers, dll, binaries, handles
+    
