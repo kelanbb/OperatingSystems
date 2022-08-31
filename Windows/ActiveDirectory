@@ -1,0 +1,64 @@
+gwmi win32_service | where {$_.name -like "adws" -or $_.name -like "kdc" -or $_.name -like "netlogon" -or $_.name -like "dns" } | select name,state,get-ADDistatus
+	shows name state status of the named services
+then can run
+get-ADDomainController
+	see what is dc and info
+		forrest, ip , etc..
+	once  see forest /domain
+		get-aDDomain army.warriors
+			what is conf of domain
+				domain mode?
+					lowest server level
+				check indivivual domain of passed domain, which is army
+		get-ADForest army.warriors
+			what is conf of forest
+		last thing to check to see if domain properlly running
+			get-smbshare
+				want to see
+					C drive
+					NETLOGIN
+					SYSVOL
+						both these need to be shared out for working DC
+Nested groups in PS
+	ps looks at stuff w modules
+	on dc by default, loads AD logon
+	get-module AdtiveDirectory
+		load ad module
+	get-command -module activedirectory
+		get all commands for the active directory
+	enumerate a group
+		get-ADGroupmember -Filter * | Select name GroupCategory GrouPScope
+		get-adgroup -Filter  "Domain Admins"
+			doesnt work
+		get-adgroup -identity  "Domain Admins"
+			see group within a group (nested group)
+				even if have permissions of different groups, a deny will override any inherited rights
+		get-adgroup 0denetity "Domain Admins" -recursive
+			get more name os all in group
+Group Policy Object queries
+	gpresult (best way, can export to html doc and see in htmp forma tin webbrowsesr)
+	get-spResultantSetOfPolicy
+DSTOOLS
+	somwhat onsolete, ps dows this stuff now
+		
+PS AD COMMANDS
+	<verb>-AD<noun>
+	get-aduser
+		new-aduser -name "Bad guy" -PassowrdnotRequired 1 -Path "OU=3rdLPT,OU=CC),OU=3RDBTN,OU=WARRIORS,DC=ARMY,DC=WARRIORS"
+	get-aduser (query individual user acct)
+		get-aduser -Filter * -property * |select -first	
+		get-aduser -Filter * -property * |select -first 1
+		get-aduser -Filter * -property * | where {$_.AllowReverseiblrPasswordEncrption -eq $true } | select name
+		get-aduser -Filter * -property * | where {$_.PasswordNotRequired -eq $true } | select name
+			get all users names with the property above
+		get-aduser -Filter * -property * | where {$_.<property,name> -like "<pattern_to_match>" } | select name <whatever_property>
+			if see gibbrisgh, might be peoperty encoded if long string
+			get-aduser -Filter * -properties * | where {$_.name -like "john*" } | select name
+			get-aduser -Filter * -properties * | where {$_.officephone -like "1234*" } | select name officephone
+			get-aduser -Filter * -properties * | where {$_.description -like "built*in*" } | select name description
+	search-adaccount	grab all ad accounts
+		search-adaccount -accountdisabled | select name
+			grabs all disabled acconuts
+		search-adaccount -accountexpired | select name
+		search-adaccount -accountexpiring | select name
+		
